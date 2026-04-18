@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>13-Team Split Brackets</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #d7deea;
+      --accent: #1d4ed8;
+      --accent-soft: #eaf2ff;
+      --bye: #ecfdf5;
+      --bye-text: #166534;
+      --shadow: 0 10px 26px rgba(0,0,0,0.08);
+      --radius: 14px;
+      --highlight: #fff3bf;
+      --highlight-border: #f59f00;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 32px;
+    }
+
+    .subtitle {
+      margin-bottom: 24px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.45;
+      max-width: 1100px;
+    }
+
+    .section-title {
+      margin: 30px 0 14px;
+      font-size: 24px;
+      color: var(--accent);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      max-width: 1200px;
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .column-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 2px;
+    }
+
+    .match {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .match-header {
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .team, .slot {
+      min-height: 46px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      border-top: 1px solid #e5e7eb;
+      font-size: 14px;
+      line-height: 1.35;
+      background: var(--card);
+    }
+
+    .team:first-of-type,
+    .slot:first-of-type {
+      border-top: none;
+    }
+
+    .seed {
+      display: inline-block;
+      width: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      flex: 0 0 24px;
+    }
+
+    .bye {
+      background: var(--bye);
+      color: var(--bye-text);
+      font-style: italic;
+    }
+
+    a.game-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+      border-bottom: 1px dashed rgba(29, 78, 216, 0.45);
+    }
+
+    a.game-link:hover {
+      color: #0f3ea8;
+      border-bottom-color: #0f3ea8;
+    }
+
+    .final-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+      max-width: 1200px;
+      margin-top: 10px;
+    }
+
+    .legend {
+      margin-top: 26px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      max-width: 1100px;
+    }
+
+    .legend h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(240px, 1fr));
+      gap: 8px 22px;
+      font-size: 14px;
+    }
+
+    .hint {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .flash {
+      animation: flashMatch 1.4s ease-in-out 2;
+      border-color: var(--highlight-border);
+      background: #fffdf2;
+      box-shadow: 0 0 0 4px rgba(245, 159, 0, 0.18), 0 10px 26px rgba(0,0,0,0.08);
+    }
+
+    @keyframes flashMatch {
+      0%, 100% {
+        background: var(--card);
+        border-color: var(--line);
+      }
+      25%, 75% {
+        background: var(--highlight);
+        border-color: var(--highlight-border);
+      }
+      50% {
+        background: #ffe8a1;
+        border-color: var(--highlight-border);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .legend-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <h1>13-Team Tournament Split into Two Brackets</h1>
+  <div class="subtitle">
+    This version is simplified for readability. Instead of bracket lines, later games include clickable links to earlier games. Clicking a game reference will jump to that matchup and make it flash.
+  </div>
+
+  <div class="section-title">Bracket 1</div>
+  <div class="grid">
+    <div class="column">
+      <div class="column-title">Opening Round</div>
+
+      <div class="match" id="game1">
+        <div class="match-header">Game 1</div>
+        <div class="team"><span class="seed">4</span> WVAC Nukes</div>
+        <div class="team"><span class="seed">13</span> WP Venom</div>
+      </div>
+
+      <div class="match" id="game2">
+        <div class="match-header">Game 2</div>
+        <div class="team"><span class="seed">5</span> ORL STORM</div>
+        <div class="team"><span class="seed">12</span> WP Under Dawgs</div>
+      </div>
+
+      <div class="match" id="game3">
+        <div class="match-header">Game 3</div>
+        <div class="team"><span class="seed">8</span> SO Rampage</div>
+        <div class="team"><span class="seed">9</span> ABA Cobra</div>
+      </div>
+    </div>
+
+    <div class="column">
+      <div class="column-title">Semifinals</div>
+
+      <div class="match" id="game4">
+        <div class="match-header">Game 4</div>
+        <div class="team bye"><span class="seed">1</span> EO Slice</div>
+        <div class="slot">Winner of <a class="game-link" href="#game3" data-target="game3">Game 3</a> (SO Rampage vs ABA Cobra)</div>
+      </div>
+
+      <div class="match" id="game5">
+        <div class="match-header">Game 5</div>
+        <div class="slot">Winner of <a class="game-link" href="#game1" data-target="game1">Game 1</a> (WVAC Nukes vs WP Venom)</div>
+        <div class="slot">Winner of <a class="game-link" href="#game2" data-target="game2">Game 2</a> (ORL STORM vs WP Under Dawgs)</div>
+      </div>
+    </div>
+
+    <div class="column">
+      <div class="column-title">Bracket 1 Championship</div>
+
+      <div class="match" id="game6">
+        <div class="match-header">Game 6</div>
+        <div class="slot">Winner of <a class="game-link" href="#game4" data-target="game4">Game 4</a> (EO Slice vs winner of Game 3)</div>
+        <div class="slot">Winner of <a class="game-link" href="#game5" data-target="game5">Game 5</a> (winner of Game 1 vs winner of Game 2)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Bracket 2</div>
+  <div class="grid">
+    <div class="column">
+      <div class="column-title">Opening Round</div>
+
+      <div class="match" id="game7">
+        <div class="match-header">Game 7</div>
+        <div class="team"><span class="seed">6</span> NSB Blacktips</div>
+        <div class="team"><span class="seed">11</span> San River Rats</div>
+      </div>
+
+      <div class="match" id="game8">
+        <div class="match-header">Game 8</div>
+        <div class="team"><span class="seed">7</span> SO Red Reepers</div>
+        <div class="team"><span class="seed">10</span> MD Hurricanes</div>
+      </div>
+    </div>
+
+    <div class="column">
+      <div class="column-title">Semifinals</div>
+
+      <div class="match" id="game9">
+        <div class="match-header">Game 9</div>
+        <div class="team bye"><span class="seed">3</span> OV Mongoose</div>
+        <div class="slot">Winner of <a class="game-link" href="#game7" data-target="game7">Game 7</a> (NSB Blacktips vs San River Rats)</div>
+      </div>
+
+      <div class="match" id="game10">
+        <div class="match-header">Game 10</div>
+        <div class="team bye"><span class="seed">2</span> WP Werewolves</div>
+        <div class="slot">Winner of <a class="game-link" href="#game8" data-target="game8">Game 8</a> (SO Red Reepers vs MD Hurricanes)</div>
+      </div>
+    </div>
+
+    <div class="column">
+      <div class="column-title">Bracket 2 Championship</div>
+
+      <div class="match" id="game11">
+        <div class="match-header">Game 11</div>
+        <div class="slot">Winner of <a class="game-link" href="#game9" data-target="game9">Game 9</a> (OV Mongoose vs winner of Game 7)</div>
+        <div class="slot">Winner of <a class="game-link" href="#game10" data-target="game10">Game 10</a> (WP Werewolves vs winner of Game 8)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Overall Final</div>
+  <div class="final-grid">
+    <div class="match" id="game12">
+      <div class="match-header">Game 12 — Championship</div>
+      <div class="slot">Winner of <a class="game-link" href="#game6" data-target="game6">Game 6</a> (Bracket 1 Champion)</div>
+      <div class="slot">Winner of <a class="game-link" href="#game11" data-target="game11">Game 11</a> (Bracket 2 Champion)</div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <h2>Teams by Seed</h2>
+    <div class="legend-grid">
+      <div>1. EO Slice</div>
+      <div>8. SO Rampage</div>
+      <div>2. WP Werewolves</div>
+      <div>9. ABA Cobra</div>
+      <div>3. OV Mongoose</div>
+      <div>10. MD Hurricanes</div>
+      <div>4. WVAC Nukes</div>
+      <div>11. San River Rats</div>
+      <div>5. ORL STORM</div>
+      <div>12. WP Under Dawgs</div>
+      <div>6. NSB Blacktips</div>
+      <div>13. WP Venom</div>
+      <div>7. SO Red Reepers</div>
+    </div>
+    <div class="hint">Tip: click any linked game number to jump to that matchup and highlight it.</div>
+  </div>
+
+  <script>
+    (function () {
+      const links = document.querySelectorAll('.game-link');
+
+      function highlightTarget(id) {
+        const target = document.getElementById(id);
+        if (!target) return;
+
+        document.querySelectorAll('.match.flash').forEach(el => el.classList.remove('flash'));
+        target.classList.add('flash');
+
+        window.setTimeout(() => {
+          target.classList.remove('flash');
+        }, 3200);
+      }
+
+      links.forEach(link => {
+        link.addEventListener('click', function () {
+          const id = this.getAttribute('data-target');
+          window.setTimeout(() => highlightTarget(id), 120);
+        });
+      });
+
+      if (window.location.hash) {
+        const id = window.location.hash.replace('#', '');
+        window.setTimeout(() => highlightTarget(id), 300);
+      }
+    })();
+  </script>
+</body>
+</html>
