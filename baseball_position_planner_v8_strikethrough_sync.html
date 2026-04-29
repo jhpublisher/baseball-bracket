@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Baseball Field Positions by Inning</title>
+<style>
+  :root { --navy:#0b1675; --line:#111; --field:#fbfcf7; --base:#ffef19; --bench:#bdf5f7; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Arial, Helvetica, sans-serif; background:#e9e9e9; color:#111; }
+  .toolbar { position:sticky; top:0; z-index:50; display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:10px; background:#fff; border-bottom:1px solid #ccc; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+  button, select, input.meta { font:14px Arial,sans-serif; padding:7px 10px; border:1px solid #888; border-radius:6px; background:#fff; }
+  button { cursor:pointer; font-weight:700; }
+  button.primary { background:var(--navy); color:#fff; border-color:var(--navy); }
+  button.danger { background:#fff3f3; border-color:#c44; color:#8b0000; }
+  .hint { font-size:12px; color:#555; margin-left:auto; }
+  .layout { width:11.2in; margin:18px auto; display:grid; grid-template-columns:8.5in 2.45in; gap:.18in; align-items:start; }
+  .page { width:8.5in; min-height:11in; background:white; padding:.16in .18in .18in; box-shadow:0 0 16px rgba(0,0,0,.25); }
+  h1 { margin:0 0 4px 0; text-align:left; padding-left:.55in; color:var(--navy); font-size:16px; letter-spacing:.3px; }
+  .field-wrap { position:relative; height:10.45in; background:var(--field); overflow:hidden; }
+  .outfield-line { position:absolute; inset:.12in .48in 2.35in .36in; border:1.5px solid #333; border-bottom:none; clip-path:polygon(45% 0,55% 0,67% 1%,80% 8%,91% 20%,98% 40%,100% 52%,83% 68%,66% 82%,50% 95%,34% 82%,17% 68%,0 52%,2% 40%,9% 20%,20% 8%,33% 1%); pointer-events:none; }
+  .diamond-line { position:absolute; left:1.38in; top:3.36in; width:5.63in; height:4.48in; pointer-events:none; }
+  .diamond-line svg { width:100%; height:100%; overflow:visible; }
+  .base { position:absolute; width:.56in; height:.56in; background:#eee; border:1.5px solid #666; }
+  .base::after { content:""; position:absolute; width:.31in; height:.31in; background:var(--base); border:1.5px solid #555; transform:rotate(45deg); left:.11in; top:.11in; }
+  .home { position:absolute; left:3.53in; top:7.38in; width:1.08in; height:.45in; border-left:2px solid #666; border-right:2px solid #666; background:#ddd; }
+  .home::after { content:""; position:absolute; left:.37in; top:-.03in; width:.31in; height:.31in; background:var(--base); border:1.5px solid #555; clip-path:polygon(0 0,100% 0,100% 60%,50% 100%,0 60%); }
+  .first { left:5.72in; top:5.10in; } .second { left:3.82in; top:2.95in; } .third { left:1.75in; top:5.13in; }
+  .pos-box { position:absolute; display:grid; grid-template-columns:20px 1fr; width:1.45in; }
+  .pos-title { grid-column:1 / span 2; text-align:center; font-size:12px; margin-bottom:2px; }
+  .inning-no { height:.195in; line-height:.195in; text-align:right; padding-right:5px; font-size:14px; }
+  .cell { height:.195in; border:1.5px solid #111; border-bottom-width:0; background:white; font-size:11px; line-height:.18in; padding:0 3px; outline:none; width:100%; min-width:0; }
+  .pos-box input:last-child, .bench-cell.last-row { border-bottom-width:1.5px; }
+  .cell:focus, .bench-cell:focus { background:#fffde0 !important; box-shadow:inset 0 0 0 2px #ffd54f; }
+  .cell.struck, .bench-cell.struck { text-decoration: line-through; text-decoration-thickness: 2px; color:#777; }
+  .summary-table th.inning-click { cursor:pointer; user-select:none; }
+  .summary-table th.inning-click:hover { background:#dde3ff; }
+  .summary-table td.sum-cell { cursor:pointer; }
+  .pos-token { display:inline-block; padding:1px 2px; border-radius:3px; cursor:pointer; }
+  .pos-token:hover { background:#eef1ff; }
+  .pos-token.struck { text-decoration:line-through; text-decoration-thickness:2px; color:#777; background:#f2f2f2; }
+  .p { left:3.82in; top:4.68in; } .c { left:3.82in; top:7.85in; }
+  .fb { left:6.45in; top:5.42in; } .sb { left:5.05in; top:3.30in; } .ss { left:1.85in; top:3.50in; } .tb { left:.62in; top:5.21in; }
+  .lf { left:1.24in; top:1.30in; } .cf { left:3.80in; top:.44in; } .rf { left:5.95in; top:1.30in; }
+  .eh { left:6.35in; top:7.48in; width:1.42in; }
+  .copy-buttons { position:absolute; left:.05in; top:8.95in; display:flex; gap:4px; align-items:center; font-size:11px; }
+  .copy-buttons button { font-size:11px; padding:3px 5px; border-radius:4px; }
+  .bench-label { position:absolute; left:.05in; bottom:1.08in; font-size:12px; color:#555; }
+  .bench-area { display:grid; grid-template-columns:repeat(6,1fr); position:absolute; left:.05in; bottom:.02in; width:3.75in; border-left:1.5px solid #111; border-top:1.5px solid #111; }
+  .bench-head, .bench-cell { min-height:.20in; border:0; border-right:1.5px solid #111; border-bottom:1.5px solid #111; text-align:center; font-size:12px; padding:1px 2px; outline:none; }
+  .bench-head { background:var(--bench); font-weight:700; } .bench-cell { background:white; text-align:left; width:100%; }
+  .result-area { position:absolute; right:.65in; bottom:.32in; width:2.35in; font-size:14px; }
+  .result-title { color:var(--navy); font-weight:700; font-size:16px; margin-bottom:18px; }
+  .line-input { display:inline-block; min-width:1.25in; border:0; border-bottom:1px solid #333; padding:1px 3px; outline:none; font:14px Arial,sans-serif; }
+  .side-panel { display:grid; gap:10px; }
+  .card { background:#fff; border:1px solid #ddd; border-radius:10px; padding:10px; box-shadow:0 0 10px rgba(0,0,0,.12); }
+  .card h2 { margin:0 0 8px; color:var(--navy); font-size:17px; }
+  .card p { margin:4px 0 8px; font-size:12px; color:#555; line-height:1.3; }
+  .roster-row { display:grid; grid-template-columns:1fr auto 44px auto; gap:5px; align-items:center; margin-bottom:5px; }
+  .roster-name { width:100%; font-size:12px; padding:5px; border:1px solid #aaa; border-radius:5px; }
+  .color-check { transform:scale(1.05); }
+  .color-select { width:44px; height:28px; padding:0; border:1px solid #aaa; border-radius:5px; }
+  .mini { font-size:11px; padding:4px 6px; }
+  .summary-table { width:100%; border-collapse:collapse; font-size:11px; }
+  .summary-table th, .summary-table td { border:1px solid #ccc; padding:3px 4px; text-align:center; }
+  .summary-table th:first-child, .summary-table td:first-child { text-align:left; font-weight:700; width:34%; }
+  .summary-table th { background:#f1f3ff; color:#111; }
+  .history-panel { width:11.2in; margin:-8px auto 18px; background:#fff; padding:12px; box-shadow:0 0 16px rgba(0,0,0,.15); }
+  .history-panel h2 { margin:0 0 8px; font-size:18px; color:var(--navy); }
+  .history-list { display:grid; gap:6px; } .history-item { display:grid; grid-template-columns:1fr auto auto; gap:6px; align-items:center; padding:7px; border:1px solid #ddd; border-radius:6px; }
+  .small { font-size:12px; color:#555; }
+  @media print {
+    @page { size: landscape; margin:.25in; }
+    body { background:white; }
+    .toolbar, .history-panel { display:none !important; }
+    .layout { width:11in; margin:0; grid-template-columns:8.25in 2.35in; gap:.12in; }
+    .page { margin:0; box-shadow:none; width:8.25in; height:10.5in; min-height:10.5in; padding:.08in; }
+    .field-wrap { height:10.2in; }
+    .side-panel { break-inside:avoid; }
+    .card { box-shadow:none; border:1px solid #aaa; padding:7px; }
+    .roster-controls { display:none; }
+    .cell:focus, .bench-cell:focus, .line-input:focus { background:white; box-shadow:none; }
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <button class="primary" onclick="window.print()">Print / Save to PDF</button>
+    <button onclick="saveGame()">Save Game to History</button>
+    <select id="historySelect"><option value="">Load saved game...</option></select>
+    <button onclick="loadSelectedGame()">Load</button>
+    <button onclick="newBlank()">New Blank Form</button>
+    <button class="danger" onclick="clearHistory()">Clear History</button>
+    <span class="hint">Type in any box. Roster names autocomplete. Click any filled field box or player breakdown position to strike/undo it. Click an inning number in the breakdown to strike/undo that whole inning. Data saves only when you press Save Game.</span>
+  </div>
+
+  <div class="layout">
+    <main class="page" id="sheet">
+      <h1>FIELD POSITIONS BY INNING</h1>
+      <section class="field-wrap">
+        <div class="outfield-line"></div>
+        <div class="diamond-line"><svg viewBox="0 0 540 430" aria-hidden="true"><polyline points="270,420 15,180 270,0 525,180 270,420" fill="none" stroke="#333" stroke-width="1.6" /></svg></div>
+        <div class="base second"></div><div class="base third"></div><div class="base first"></div><div class="home"></div>
+        <div class="pos-box p" data-pos="P"></div><div class="pos-box c" data-pos="C"></div><div class="pos-box fb" data-pos="1B"></div><div class="pos-box sb" data-pos="2B"></div><div class="pos-box ss" data-pos="SS"></div><div class="pos-box tb" data-pos="3B"></div><div class="pos-box lf" data-pos="LF"></div><div class="pos-box cf" data-pos="CF"></div><div class="pos-box rf" data-pos="RF"></div>
+        <div class="pos-box eh" data-pos="EH"><div class="pos-title">Extra Hitter</div></div>
+        <div class="copy-buttons"><strong>Copy previous inning:</strong> <button onclick="copyPreviousInning(2)">2</button><button onclick="copyPreviousInning(3)">3</button><button onclick="copyPreviousInning(4)">4</button><button onclick="copyPreviousInning(5)">5</button><button onclick="copyPreviousInning(6)">6</button></div>
+        <div class="bench-label">BENCH</div><div class="bench-area" id="bench"></div>
+        <div class="result-area"><div class="result-title">RESULT: <input id="result" class="line-input" data-field="result"></div><div>Opponent: <input id="opponent" class="line-input" data-field="opponent"></div><div style="text-align:center;">Date: <input id="date" class="line-input" data-field="date"></div></div>
+      </section>
+    </main>
+
+    <aside class="side-panel">
+      <section class="card">
+        <h2>Roster / Player Colors</h2>
+        <p>Enter roster names here. Position boxes will autocomplete as you type. Check the box to turn on a player color.</p>
+        <datalist id="rosterList"></datalist>
+        <div id="rosterRows"></div>
+        <div class="roster-controls"><button class="mini" onclick="addRosterRow()">Add Player</button> <button class="mini" onclick="removeEmptyRosterRows()">Remove Empty</button></div>
+      </section>
+      <section class="card">
+        <h2>Player-by-Player Breakdown</h2>
+        <p>Updates automatically from the field and bench boxes. Click an inning number to strike/undo that whole inning, or click a position to strike/undo one assignment.</p>
+        <div id="playerSummary"></div>
+      </section>
+    </aside>
+  </div>
+
+  <section class="history-panel"><h2>Saved Game History</h2><div id="historyList" class="history-list"></div></section>
+
+<script>
+const STORAGE_KEY = 'baseball_position_planner_games_v4';
+const positions = ['P','C','1B','2B','SS','3B','LF','CF','RF','EH'];
+let scratched = new Set();
+const colors = ['#ffadad','#ffd6a5','#fdffb6','#caffbf','#9bf6ff','#a0c4ff','#bdb2ff','#ffc6ff','#f4a261','#e9c46a','#2a9d8f','#90be6d','#43aa8b','#577590','#f94144','#f3722c','#f8961e','#277da1','#b56576','#6d597a'];
+function el(tag, cls){ const e=document.createElement(tag); if(cls) e.className=cls; return e; }
+function makeBoxes(){
+  document.querySelectorAll('.pos-box').forEach(box=>{
+    const pos=box.dataset.pos;
+    for(let i=1;i<=6;i++){
+      const n=el('div','inning-no'); n.textContent=i;
+      const c=el('input','cell'); c.setAttribute('list','rosterList'); c.dataset.key=`${pos}_${i}`; c.dataset.pos=pos; c.dataset.inning=i; c.addEventListener('input',handleAnyInput); c.addEventListener('click',handleAssignmentClick);
+      box.appendChild(n); box.appendChild(c);
+    }
+  });
+  const bench=document.getElementById('bench');
+  for(let i=1;i<=6;i++){ const h=el('div','bench-head'); h.textContent=i; bench.appendChild(h); }
+  for(let r=1;r<=5;r++){ for(let i=1;i<=6;i++){ const c=el('input','bench-cell'); c.setAttribute('list','rosterList'); c.dataset.key=`BENCH_${r}_${i}`; c.dataset.pos='Bench'; c.dataset.inning=i; c.addEventListener('input',handleAnyInput); c.addEventListener('click',handleAssignmentClick); bench.appendChild(c); } }
+}
+function makeRosterRows(n=13){ for(let i=0;i<n;i++) addRosterRow(); }
+function addRosterRow(name='',enabled=false,color=null){
+  const wrap=document.getElementById('rosterRows'); const row=el('div','roster-row');
+  const nameInput=el('input','roster-name'); nameInput.placeholder='Player name'; nameInput.value=name; nameInput.addEventListener('input',handleRosterChange);
+  const check=el('input','color-check'); check.type='checkbox'; check.checked=enabled; check.title='Turn on color'; check.addEventListener('change',handleRosterChange);
+  const colorInput=el('input','color-select'); colorInput.type='color'; colorInput.value=color || colors[wrap.children.length % colors.length]; colorInput.addEventListener('input',handleRosterChange);
+  const del=el('button','mini'); del.textContent='×'; del.title='Remove row'; del.onclick=()=>{ row.remove(); handleRosterChange(); };
+  row.append(nameInput,check,colorInput,del); wrap.appendChild(row); handleRosterChange();
+}
+function getRoster(){ return [...document.querySelectorAll('.roster-row')].map(r=>({name:r.querySelector('.roster-name').value.trim(), enabled:r.querySelector('.color-check').checked, color:r.querySelector('.color-select').value})).filter(p=>p.name); }
+function handleRosterChange(){ updateDatalist(); applyPlayerColors(); updateSummary(); }
+function updateDatalist(){ const dl=document.getElementById('rosterList'); dl.innerHTML=''; getRoster().forEach(p=>{ const o=document.createElement('option'); o.value=p.name; dl.appendChild(o); }); }
+function findPlayer(name){ const clean=(name||'').trim().toLowerCase(); return getRoster().find(p=>p.name.toLowerCase()===clean); }
+function applyPlayerColors(){ document.querySelectorAll('[data-key]').forEach(inp=>{ const p=findPlayer(inp.value); inp.style.backgroundColor=(p && p.enabled) ? p.color : 'white'; }); }
+function assignmentKey(pos, inning, name){ return `${pos}|${inning}|${(name||'').trim().toLowerCase()}`; }
+function getInputAssignmentKey(inp){ const name=inp.value.trim(); if(!name) return ''; return assignmentKey(inp.dataset.pos, inp.dataset.inning, name); }
+function setInputStrikeStyles(){
+  document.querySelectorAll('[data-key]').forEach(inp=>{
+    const key=getInputAssignmentKey(inp);
+    inp.classList.toggle('struck', !!key && scratched.has(key));
+  });
+}
+function toggleAssignment(pos, inning, name){
+  const key=assignmentKey(pos, inning, name);
+  if(scratched.has(key)) scratched.delete(key); else scratched.add(key);
+  setInputStrikeStyles(); updateSummary();
+}
+function togglePlayerInning(name, inning){
+  const assignments=[];
+  document.querySelectorAll(`[data-inning="${inning}"]`).forEach(inp=>{
+    if(inp.value.trim().toLowerCase()===name.toLowerCase()) assignments.push({pos:inp.dataset.pos, inning, name});
+  });
+  if(!assignments.length) return;
+  const allStruck=assignments.every(a=>scratched.has(assignmentKey(a.pos,a.inning,a.name)));
+  assignments.forEach(a=>{
+    const key=assignmentKey(a.pos,a.inning,a.name);
+    if(allStruck) scratched.delete(key); else scratched.add(key);
+  });
+  setInputStrikeStyles(); updateSummary();
+}
+function toggleEntireInning(inning){
+  const assignments=[];
+  document.querySelectorAll(`[data-inning="${inning}"]`).forEach(inp=>{
+    const name=inp.value.trim();
+    if(name) assignments.push({pos:inp.dataset.pos, inning, name});
+  });
+  if(!assignments.length) return;
+  const allStruck=assignments.every(a=>scratched.has(assignmentKey(a.pos,a.inning,a.name)));
+  assignments.forEach(a=>{
+    const key=assignmentKey(a.pos,a.inning,a.name);
+    if(allStruck) scratched.delete(key); else scratched.add(key);
+  });
+  setInputStrikeStyles(); updateSummary();
+}
+function handleAssignmentClick(e){
+  const inp=e.currentTarget;
+  if(inp.value.trim()) toggleAssignment(inp.dataset.pos, inp.dataset.inning, inp.value.trim());
+}
+function handleAnyInput(){
+  const currentKeys=new Set([...document.querySelectorAll('[data-key]')].map(getInputAssignmentKey).filter(Boolean));
+  scratched = new Set([...scratched].filter(k=>currentKeys.has(k)));
+  applyPlayerColors(); setInputStrikeStyles(); updateSummary();
+}
+function copyPreviousInning(inning){ if(inning<2) return; positions.forEach(pos=>{ const prev=document.querySelector(`[data-key="${pos}_${inning-1}"]`); const cur=document.querySelector(`[data-key="${pos}_${inning}"]`); if(prev&&cur) cur.value=prev.value; }); for(let r=1;r<=5;r++){ const prev=document.querySelector(`[data-key="BENCH_${r}_${inning-1}"]`); const cur=document.querySelector(`[data-key="BENCH_${r}_${inning}"]`); if(prev&&cur) cur.value=prev.value; } handleAnyInput(); }
+function updateSummary(){
+  const roster=getRoster(); const names=roster.length ? roster.map(p=>p.name) : [...new Set([...document.querySelectorAll('[data-key]')].map(i=>i.value.trim()).filter(Boolean))].sort();
+  if(!names.length){ document.getElementById('playerSummary').innerHTML='<div class="small">Add roster names or fill in positions to see the breakdown.</div>'; return; }
+  let html='<table class="summary-table"><thead><tr><th>Player</th>'; for(let i=1;i<=6;i++) html+=`<th class="inning-click" onclick="toggleEntireInning(${i})" title="Strike/undo all players in inning ${i}">${i}</th>`; html+='</tr></thead><tbody>';
+  names.forEach(name=>{ html+=`<tr><td>${escapeHtml(name)}</td>`; for(let inn=1;inn<=6;inn++){ const pos=[]; document.querySelectorAll(`[data-inning="${inn}"]`).forEach(inp=>{ if(inp.value.trim().toLowerCase()===name.toLowerCase()) pos.push(inp.dataset.pos); }); const cellHtml=pos.map(p=>{ const key=assignmentKey(p, inn, name); const cls=scratched.has(key)?'pos-token struck':'pos-token'; return `<span class="${cls}" onclick="event.stopPropagation(); toggleAssignment('${escapeJs(p)}', ${inn}, '${escapeJs(name)}')">${escapeHtml(p)}</span>`; }).join(', '); html+=`<td class="sum-cell" onclick="togglePlayerInning('${escapeJs(name)}', ${inn})">${cellHtml}</td>`; } html+='</tr>'; });
+  html+='</tbody></table>'; document.getElementById('playerSummary').innerHTML=html;
+}
+function collectData(){ const data={}; document.querySelectorAll('[data-key]').forEach(el=>data[el.dataset.key]=el.value.trim()); document.querySelectorAll('[data-field]').forEach(el=>data[el.dataset.field]=el.value.trim()); data.roster=getRoster(); data.scratched=[...scratched]; data.savedAt=new Date().toISOString(); return data; }
+function applyData(data){ document.querySelectorAll('[data-key]').forEach(el=>el.value=data[el.dataset.key]||''); document.querySelectorAll('[data-field]').forEach(el=>el.value=data[el.dataset.field]||''); scratched=new Set(data.scratched||[]); const rows=document.getElementById('rosterRows'); rows.innerHTML=''; (data.roster&&data.roster.length?data.roster:Array.from({length:13},()=>({name:'',enabled:false,color:null}))).forEach(p=>addRosterRow(p.name||'',!!p.enabled,p.color||null)); handleAnyInput(); }
+function getGames(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); } function setGames(games){ localStorage.setItem(STORAGE_KEY,JSON.stringify(games)); refreshHistory(); }
+function saveGame(){ const data=collectData(); const label=`${data.date||'No date'} — ${data.opponent||'No opponent'}${data.result?' — '+data.result:''}`; const games=getGames(); games.unshift({id:Date.now().toString(),label,data}); setGames(games); alert('Game saved.'); }
+function loadSelectedGame(){ const id=document.getElementById('historySelect').value; const game=getGames().find(g=>g.id===id); if(game) applyData(game.data); }
+function deleteGame(id){ if(!confirm('Delete this saved game?')) return; setGames(getGames().filter(g=>g.id!==id)); }
+function newBlank(){ if(confirm('Clear the current form? Save first if you need it.')) applyData({}); }
+function clearHistory(){ if(confirm('Clear all saved game history from this browser?')) setGames([]); }
+function refreshHistory(){ const games=getGames(); const select=document.getElementById('historySelect'); select.innerHTML='<option value="">Load saved game...</option>'; const list=document.getElementById('historyList'); list.innerHTML=''; games.forEach(g=>{ const opt=document.createElement('option'); opt.value=g.id; opt.textContent=g.label; select.appendChild(opt); const row=el('div','history-item'); row.innerHTML=`<div><strong>${escapeHtml(g.label)}</strong><div class="small">Saved ${new Date(g.data.savedAt).toLocaleString()}</div></div>`; const load=el('button'); load.textContent='Load'; load.onclick=()=>applyData(g.data); const del=el('button','danger'); del.textContent='Delete'; del.onclick=()=>deleteGame(g.id); row.append(load,del); list.appendChild(row); }); if(!games.length) list.innerHTML='<div class="small">No saved games yet.</div>'; }
+function removeEmptyRosterRows(){ [...document.querySelectorAll('.roster-row')].forEach(r=>{ if(!r.querySelector('.roster-name').value.trim()) r.remove(); }); handleRosterChange(); }
+function escapeHtml(s){ return (s||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+function escapeJs(s){ return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+const defaultRoster = [
+  {name:'Anderson',enabled:false,color:null},
+  {name:'Mason',enabled:false,color:null},
+  {name:'David',enabled:false,color:null},
+  {name:'Brayden',enabled:false,color:null},
+  {name:'JP',enabled:false,color:null},
+  {name:'Maddox',enabled:false,color:null},
+  {name:'Abe',enabled:false,color:null},
+  {name:'Jack',enabled:false,color:null},
+  {name:'Cuinn',enabled:false,color:null},
+  {name:'Connor',enabled:false,color:null},
+  {name:'Jax',enabled:false,color:null}
+];
+const temporaryPositionInput = {
+  // Verified temporary placement: each player appears at most once per inning.
+  'P_1':'JP', 'P_2':'Maddox', 'P_3':'Abe', 'P_4':'Jack', 'P_5':'Cuinn', 'P_6':'Connor',
+
+  'C_1':'Cuinn', 'C_2':'JP', 'C_3':'Maddox', 'C_4':'Jax',
+
+  '1B_1':'Abe', '1B_2':'Cuinn', '1B_3':'Jack', '1B_4':'Anderson',
+
+  '2B_1':'Jax', '2B_2':'Mason', '2B_3':'Anderson', '2B_5':'David',
+
+  'SS_1':'Brayden', 'SS_2':'David', 'SS_3':'Mason',
+
+  '3B_1':'Connor', '3B_2':'Abe', '3B_3':'Jax', '3B_4':'Brayden',
+
+  'LF_1':'Jack', 'LF_2':'Anderson', 'LF_3':'Brayden', 'LF_4':'David',
+
+  'CF_1':'Maddox', 'CF_2':'Connor', 'CF_3':'JP', 'CF_4':'Mason'
+};
+makeBoxes();
+defaultRoster.forEach(p=>addRosterRow(p.name,p.enabled,p.color));
+addRosterRow();
+Object.entries(temporaryPositionInput).forEach(([key,value])=>{ const input=document.querySelector(`[data-key="${key}"]`); if(input) input.value=value; });
+document.querySelectorAll('[data-field]').forEach(i=>i.addEventListener('input',handleAnyInput));
+refreshHistory();
+handleAnyInput();
+updateSummary();
+</script>
+</body>
+</html>
