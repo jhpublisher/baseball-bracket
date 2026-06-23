@@ -29,8 +29,6 @@
   .tab.active{background:var(--cream);color:var(--navy)}
   .tab:focus-visible{outline:2px solid var(--red);outline-offset:2px}
   .panel{padding-top:18px}
-
-  /* list shell with vertical side label (echoes the printed guide) */
   .listwrap{display:flex;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
   .vband{background:var(--navy);color:#fff;writing-mode:vertical-rl;transform:rotate(180deg);
     font-family:'Anton',sans-serif;font-size:clamp(20px,3vw,30px);text-transform:uppercase;letter-spacing:2px;
@@ -45,7 +43,6 @@
   .bar>i{display:block;height:100%;background:var(--red);width:0;transition:width .25s}
   .printbtn{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-weight:600;font-size:13px;cursor:pointer}
   .printbtn:hover{background:var(--navy-2)}
-
   .grid{display:grid;grid-template-columns:1fr;gap:12px}
   @media(min-width:680px){.grid{grid-template-columns:1fr 1fr}}
   @media(min-width:1000px){.grid{grid-template-columns:1fr 1fr 1fr}}
@@ -65,13 +62,13 @@
   .flag{color:var(--red);font-weight:700}
   .rm{margin-left:auto;border:none;background:none;color:#c3cad2;cursor:pointer;font-size:15px;line-height:1;padding:0 4px}
   .rm:hover{color:var(--red)}
-  .addrow{display:flex;gap:8px;margin-top:8px}
-  .addrow input{flex:1;padding:9px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:inherit}
-  .addrow button{background:var(--red);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer}
-
+  .addmini{display:flex;gap:6px;margin-top:6px;padding:0 4px}
+  .addmini input{flex:1;padding:6px 8px;border:1px dashed #c3cad2;border-radius:7px;font-size:13px;font-family:inherit}
+  .addmini button{background:var(--red);color:#fff;border:none;border-radius:7px;width:30px;font-size:18px;line-height:1;cursor:pointer}
+  .combo{display:flex;align-items:center;gap:6px;margin:2px 0 4px 27px}
+  .combo input{flex:1;padding:5px 8px;border:1px solid var(--line);border-radius:7px;font-size:13px;font-family:inherit}
+  .combo span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
   .print-head{display:none}
-
-  /* community + dash */
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
   .ci{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:#fff}
   .ci .nm{font-weight:600;font-size:15px}
@@ -89,46 +86,40 @@
   td .mini{height:7px;width:84px;background:#eee6d6;border-radius:99px;overflow:hidden;display:inline-block;vertical-align:middle}
   td .mini>i{display:block;height:100%;background:var(--red)}
   .note{font-size:12.5px;color:var(--muted);margin:6px 0;line-height:1.5}
-  .toggle{display:flex;align-items:center;gap:10px;margin:4px 0 0}
-  .toggle input{width:20px;height:20px;accent-color:var(--red)}
-
-  /* auth screens */
   .field{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;font-size:15px;margin-bottom:10px;font-family:inherit}
   .field:focus{outline:2px solid var(--navy);border-color:var(--navy)}
   .center{min-height:78vh;display:flex;align-items:center;justify-content:center;padding:20px}
-  .box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px;max-width:400px;width:100%}
+  .box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px;max-width:440px;width:100%}
   .box h2{font-family:'Anton',sans-serif;color:var(--navy);font-size:24px;text-transform:uppercase;letter-spacing:.5px}
-  .box p{color:var(--muted);font-size:14px;margin:6px 0 18px}
+  .box p{color:var(--muted);font-size:14px;margin:6px 0 16px}
   .btn-primary{width:100%;background:var(--red);color:#fff;border:none;padding:12px;border-radius:9px;font-weight:700;font-size:15px;cursor:pointer}
   .btn-primary:hover{background:var(--red-d)}
+  .btn-primary:disabled{background:#d8b6b6;cursor:not-allowed}
   .btn-google{width:100%;background:#fff;border:1px solid var(--line);padding:11px;border-radius:9px;font-weight:600;cursor:pointer;display:flex;gap:9px;align-items:center;justify-content:center;margin-bottom:14px}
   .or{text-align:center;color:var(--muted);font-size:12px;margin:6px 0 12px}
   .toglink{background:none;border:none;color:var(--navy);font-weight:600;cursor:pointer;font-size:13px}
   .err{color:var(--red);font-size:13px;margin-top:6px;min-height:18px}
-  .roster{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
-  .rbtn{padding:13px 10px;border:1px solid var(--line);background:#fff;border-radius:10px;font-weight:600;font-size:15px;cursor:pointer;color:var(--navy);text-align:center}
+  .picklabel{font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.5px;color:var(--navy);font-size:13px;margin:14px 0 6px;display:flex;align-items:center;gap:8px}
+  .picklabel::before{content:"";width:12px;height:3px;background:var(--red)}
+  .roster{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .rbtn{padding:12px 10px;border:1px solid var(--line);background:#fff;border-radius:10px;font-weight:600;font-size:15px;cursor:pointer;color:var(--navy);text-align:center}
   .rbtn:hover{border-color:var(--red);background:#fff7f6}
+  .rbtn.sel{background:var(--navy);color:#fff;border-color:var(--navy)}
   .hide{display:none!important}
   .empty{color:var(--muted);font-size:14px;text-align:center;padding:18px}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-
-  /* PRINT — one page, looks like the guide, with player name */
   @media print{
     @page{size:portrait;margin:10mm}
     body{background:#fff}
     header,nav.tabs,.who,.topbar,.addrow,.rm,.note{display:none!important}
-    .wrap{padding:0;max-width:none}
-    .panel{padding:0}
+    .wrap{padding:0;max-width:none}.panel{padding:0}
     #panel-team{display:none!important}
-    .listwrap{border:none;margin:0}
-    .vband{padding:10px 6px;font-size:22px}
-    .listmain{padding:0 0 0 10px}
+    .listwrap{border:none;margin:0}.vband{padding:10px 6px;font-size:22px}.listmain{padding:0 0 0 10px}
     .print-head{display:block;margin-bottom:8px}
     .print-head .pn{font-family:'Anton',sans-serif;font-size:20px;color:var(--navy);text-transform:uppercase}
     .print-head .pt{font-size:12px;color:var(--muted)}
     .grid{grid-template-columns:1fr 1fr 1fr;gap:6px}
-    .seccard{padding:6px 8px}
-    .sec-h{font-size:11px}
+    .seccard{padding:6px 8px}.sec-h{font-size:11px}
     label.item{font-size:11px;padding:2px 2px}
     label.item input{width:13px;height:13px}
     label.item input:checked::after{left:3.5px;top:0;width:4px;height:7px}
@@ -167,12 +158,19 @@
   </div>
 </div>
 
-<!-- PICK KID -->
+<!-- PICK -->
 <div id="picker" class="center hide">
   <div class="box">
-    <h2>Pick your player</h2>
-    <p>Choose your kid. Both parents pick the same one — it stays in sync.</p>
-    <div class="roster" id="rosterGrid"></div>
+    <h2>Pick your spot</h2>
+    <p id="pickHelp">Choose your player. Both parents pick the same one — it stays in sync.</p>
+    <div class="picklabel">Player</div>
+    <div class="roster" id="playerGrid"></div>
+    <div id="coachWrap" class="hide">
+      <div class="picklabel">Coach (optional)</div>
+      <div class="roster" id="coachGrid"></div>
+    </div>
+    <button class="btn-primary" id="pickBtn" style="margin-top:16px" disabled>Continue</button>
+    <div class="err" id="pickErr"></div>
   </div>
 </div>
 
@@ -184,20 +182,20 @@
       <h1>Cooperstown <span class="acc">Coop Hub</span></h1>
       <div class="sub">PLAYER · COACH · TEAM</div>
       <div class="who">
-        <span>Player: <b id="whoKid"></b></span>
-        <button class="lnk" id="switchKid">Switch player</button>
+        <span id="whoLine"></span>
+        <button class="lnk" id="switchKid">Switch</button>
         <button class="lnk" id="signoutBtn">Sign out</button>
       </div>
     </div>
     <nav class="tabs">
-      <button class="tab active" data-tab="player">Player</button>
-      <button class="tab" data-tab="coach">Coach</button>
-      <button class="tab" data-tab="team">Team</button>
+      <button class="tab" data-tab="player" id="tabPlayer">Player</button>
+      <button class="tab" data-tab="coach" id="tabCoach">Coach</button>
+      <button class="tab" data-tab="team" id="tabTeam">Team</button>
     </nav>
   </header>
   <div class="wrap">
 
-    <section class="panel" id="panel-player">
+    <section class="panel hide" id="panel-player">
       <div class="listwrap">
         <div class="vband">Player Packing List</div>
         <div class="listmain">
@@ -207,7 +205,6 @@
             <button class="printbtn" id="printPlayer">Print</button>
           </div>
           <div class="grid" id="playerBody"></div>
-          <div class="addrow"><input id="addPlayerIn" placeholder="Add your own item…" maxlength="40"><button id="addPlayerBtn">Add</button></div>
         </div>
       </div>
     </section>
@@ -221,10 +218,7 @@
             <div class="prog"><div class="prog-row"><span class="lbl">Coach packing</span><span class="pct" id="cpct">0%</span></div><div class="bar"><i id="cbar"></i></div></div>
             <button class="printbtn" id="printCoach">Print</button>
           </div>
-          <div class="toggle"><input type="checkbox" id="isCoach"><label for="isCoach" style="font-size:13px;font-weight:600">I'm a coach (count my coach packing on the Team board)</label></div>
-          <div class="note">Open to everyone as reference. Only flagged coaches show on the Team roll-up.</div>
           <div class="grid" id="coachBody"></div>
-          <div class="addrow"><input id="addCoachIn" placeholder="Add your own item…" maxlength="40"><button id="addCoachBtn">Add</button></div>
         </div>
       </div>
     </section>
@@ -242,9 +236,7 @@
 </div>
 
 <script type="module">
-/* ============================================================
-   1) FIREBASE CONFIG
-   ============================================================ */
+/* ============================================================ */
 const firebaseConfig = {
   apiKey: "AIzaSyD6bsi6aQr0M7h-sAqDusSO7kxCS4VodVY",
   authDomain: "baseball-lineup-84e74.firebaseapp.com",
@@ -253,11 +245,7 @@ const firebaseConfig = {
   messagingSenderId: "291821684521",
   appId: "1:291821684521:web:0215e9992f3f3b89185938"
 };
-
-/* 2) Team code */
 const TEAM_CODE = "Wolves26";
-
-/* 3) Coaches — Google emails (lowercase). These logins can edit ANY kid. */
 const COACH_EMAILS = [
   "joehurst21@gmail.com",   // Joe H
   "ccrews@shutts.com",      // Chad C
@@ -277,6 +265,7 @@ const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getFirestore(app)
 
 const ROSTER=["Cuinn C.","Anderson P.","Beckett G.","Maddox M.","Mateo C.","William W.",
   "JP A.","JJ H.","Jack B.","Abraham H.","Greyson G.","Mason H."];
+const COACHES=["Joe H","Chad C","Rick M","Alex W"];
 
 const PACKING={
  player:{
@@ -284,7 +273,7 @@ const PACKING={
   "Clothing":["Underwear","Socks","T-shirts","Shorts","Pajamas","Flip Flops/Crocs (showering)","Hoodie or Jacket","Swim Trunks (showering)","Sweatpants"],
   "Personal":["Toothbrush","Toothpaste","Deodorant","Body Wash","Shampoo","Comb/Brush","Lip Balm","Sunscreen","Medication","Bug Spray","Gold Bond Powder/Spray","Mesh Toiletry Bag"],
   "Other / Misc":["Trading Pins","Pin Towel/Book/Case","Extension Cord","Wiffle Balls","Card Games","Box Fan","Personal/Clip-on Fan","Team Hat & Shirt","Phone Charger","Pillow w/ Pillowcase","Twin Sheet Set","Blanket or Sleeping Bag","2 Towels (microfiber)","2 Washcloths","Flashlight or Headlamp","List of Teams (pin trading)","Rain Poncho/Umbrella","Padlock (2)","Over-the-Door Hook","Fabric Labels / Sharpies","Concession Money","Confidence & Good Attitude","★ BIRTH CERTIFICATE"],
-  "Optional":["5-Gal Bucket w/ Lid","Extra Cleats (rain)","Extra Navy & Red Socks","Refillable Water Bottle","Extra Shoelaces","Shoe Dryer","Cooling Towel","Sleep Mask","Eye Black"]
+  "Optional":["5-Gal Bucket w/ Lid","Extra Cleats (rain)","Extra Navy & Red Socks","Refillable Water Bottle","Extra Shoelaces","Shoe Dryer","Cooling Towel","Sleep Mask","Eye Black","Ear Plugs"]
  },
  coach:{
   "Equipment":["Fungo","Sunglasses","First Aid Kit","Bucket of Balls","Glove"],
@@ -303,7 +292,8 @@ const totalFor=l=>Object.values(PACKING[l]).reduce((n,a)=>n+a.length,0);
 const $=id=>document.getElementById(id);
 const LS=window.localStorage;
 
-let me=null, playerId=null, rec=null, unsub=[], isCoachUser=false;
+let me=null, playerId=null, coachId=null, recPlayer=null, recCoach=null, unsub=[], isCoachUser=false;
+let selPlayer=null, selCoach=null;
 const clearSubs=()=>{unsub.forEach(f=>f());unsub=[]};
 
 /* login */
@@ -317,23 +307,42 @@ $("emailBtn").onclick=async()=>{const em=$("email").value.trim(),pw=$("pass").va
   catch(e){$("loginErr").textContent=e.message.replace("Firebase:","").trim()}};
 $("signoutBtn").onclick=()=>signOut(auth);
 
-/* team code */
 $("codeBtn").onclick=()=>{
   if($("codeIn").value.trim().toUpperCase()===TEAM_CODE.toUpperCase()){LS.setItem("coop_team","1");route()}
   else $("codeErr").textContent="That code didn't match.";
 };
 
-/* roster */
-function buildRoster(){
-  $("rosterGrid").innerHTML="";
+/* picker */
+function buildPickers(){
+  selPlayer=null;selCoach=null;
+  $("playerGrid").innerHTML="";
   ROSTER.forEach(n=>{const b=document.createElement("button");b.className="rbtn";b.textContent=n;
-    b.onclick=async()=>{
-      if(isCoachUser){LS.setItem("coop_player",slug(n));}
-      else{await setDoc(doc(db,"users",me.uid),{email:me.email,playerId:slug(n)},{merge:true});}
-      route();
-    };$("rosterGrid").appendChild(b)});
+    b.onclick=()=>{selPlayer=(selPlayer===slug(n))?null:slug(n);paint();};$("playerGrid").appendChild(b);});
+  if(isCoachUser){
+    $("coachWrap").classList.remove("hide");
+    $("pickHelp").textContent="Pick a player, a coach, or both. Coaches can switch anytime.";
+    $("coachGrid").innerHTML="";
+    COACHES.forEach(n=>{const b=document.createElement("button");b.className="rbtn";b.textContent=n;
+      b.onclick=()=>{selCoach=(selCoach===slug(n))?null:slug(n);paint();};$("coachGrid").appendChild(b);});
+  }else{$("coachWrap").classList.add("hide");}
+  paint();
 }
-$("switchKid").onclick=()=>{LS.removeItem("coop_player");route()};
+function paint(){
+  [...$("playerGrid").children].forEach(b=>b.classList.toggle("sel",slug(b.textContent)===selPlayer));
+  if(isCoachUser)[...$("coachGrid").children].forEach(b=>b.classList.toggle("sel",slug(b.textContent)===selCoach));
+  $("pickBtn").disabled=!(selPlayer||selCoach);
+}
+$("pickBtn").onclick=async()=>{
+  if(!(selPlayer||selCoach)){$("pickErr").textContent="Pick at least one.";return;}
+  if(isCoachUser){
+    selPlayer?LS.setItem("coop_player",selPlayer):LS.removeItem("coop_player");
+    selCoach?LS.setItem("coop_coach",selCoach):LS.removeItem("coop_coach");
+  }else{
+    await setDoc(doc(db,"users",me.uid),{email:me.email,playerId:selPlayer},{merge:true});
+  }
+  route();
+};
+$("switchKid").onclick=()=>{LS.removeItem("coop_player");LS.removeItem("coop_coach");route();};
 
 function show(id){["login","gate","picker","app"].forEach(s=>$(s).classList.toggle("hide",s!==id))}
 
@@ -342,13 +351,14 @@ async function route(){
   if(LS.getItem("coop_team")!=="1"){show("gate");return}
   isCoachUser=COACH_EMAILS.includes(me.email);
   if(isCoachUser){
-    playerId=LS.getItem("coop_player");
-    if(!playerId){buildRoster();show("picker");return}
+    playerId=LS.getItem("coop_player")||null;
+    coachId=LS.getItem("coop_coach")||null;
+    if(!playerId&&!coachId){buildPickers();show("picker");return}
     $("switchKid").classList.remove("hide");
   }else{
     const us=await getDoc(doc(db,"users",me.uid));
-    playerId=us.exists()?us.data().playerId:null;
-    if(!playerId){buildRoster();show("picker");return}
+    playerId=us.exists()?us.data().playerId:null;coachId=null;
+    if(!playerId){buildPickers();show("picker");return}
     $("switchKid").classList.add("hide");
   }
   show("app");startApp();
@@ -358,76 +368,102 @@ onAuthStateChanged(auth,u=>{clearSubs();me=u?{uid:u.uid,email:(u.email||"").toLo
 
 function startApp(){
   clearSubs();
-  const name=ROSTER.find(n=>slug(n)===playerId)||playerId;
-  $("whoKid").textContent=name;$("pnPlayer").textContent=name;$("pnCoach").textContent=name;
-  const ref=doc(db,"players",playerId);
-  unsub.push(onSnapshot(ref,snap=>{
-    if(!snap.exists()){setDoc(ref,{name,checked:{},coachChecked:{},custom:[],customCoach:[],isCoach:false,updatedAt:serverTimestamp()});return}
-    rec=snap.data();
-    $("isCoach").checked=!!rec.isCoach;
-    renderList("player",rec.checked||{},"playerBody","ppct","pbar","checked","custom",rec.custom||[]);
-    renderList("coach",rec.coachChecked||{},"coachBody","cpct","cbar","coachChecked","customCoach",rec.customCoach||[]);
-  }));
+  const pName=playerId?(ROSTER.find(n=>slug(n)===playerId)||playerId):null;
+  const cName=coachId?(COACHES.find(n=>slug(n)===coachId)||coachId):null;
+  const parts=[];if(pName)parts.push("Player: <b>"+pName+"</b>");if(cName)parts.push("Coach: <b>"+cName+"</b>");
+  $("whoLine").innerHTML=parts.join(" &nbsp;·&nbsp; ");
+
+  // tab visibility
+  $("tabPlayer").classList.toggle("hide",!playerId);
+  $("tabCoach").classList.toggle("hide",!coachId);
+  const first=playerId?"player":(coachId?"coach":"team");
+  activate(first);
+
+  if(playerId){
+    $("pnPlayer").textContent=pName;
+    const ref=doc(db,"players",playerId);
+    unsub.push(onSnapshot(ref,snap=>{
+      if(!snap.exists()){setDoc(ref,{name:pName,checked:{},custom:[],updatedAt:serverTimestamp()});return}
+      recPlayer=snap.data();
+      renderList("player",recPlayer,"playerBody","ppct","pbar",ref);
+    }));
+  }
+  if(coachId){
+    $("pnCoach").textContent=cName;
+    const ref=doc(db,"coaches",coachId);
+    unsub.push(onSnapshot(ref,snap=>{
+      if(!snap.exists()){setDoc(ref,{name:cName,checked:{},custom:[],updatedAt:serverTimestamp()});return}
+      recCoach=snap.data();
+      renderList("coach",recCoach,"coachBody","cpct","cbar",ref);
+    }));
+  }
   unsub.push(onSnapshot(collection(db,"community"),s=>{const m={};s.forEach(d=>m[d.id]=d.data());renderCommunity(m)}));
-  unsub.push(onSnapshot(collection(db,"players"),s=>{const r=[];s.forEach(d=>r.push({id:d.id,...d.data()}));renderDash(r)}));
+  unsub.push(onSnapshot(collection(db,"players"),s=>{const r=[];s.forEach(d=>r.push({id:d.id,...d.data()}));renderPlayerDash(r)}));
+  unsub.push(onSnapshot(collection(db,"coaches"),s=>{const r=[];s.forEach(d=>r.push({id:d.id,...d.data()}));renderCoachDash(r)}));
 }
 
-$("isCoach").onchange=e=>setDoc(doc(db,"players",playerId),{isCoach:e.target.checked},{merge:true});
+function activate(tab){
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  $("tab"+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add("active");
+  ["player","coach","team"].forEach(p=>$("panel-"+p).classList.add("hide"));
+  $("panel-"+tab).classList.remove("hide");
+}
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>activate(t.dataset.tab));
+
 $("printPlayer").onclick=()=>window.print();
 $("printCoach").onclick=()=>window.print();
 
-/* add custom items */
-function addCustom(field,inputId){
-  const v=$(inputId).value.trim();if(!v)return;
-  const cur=(rec&&rec[field])||[];
-  const arr=[...cur,{id:"c-"+Date.now(),label:v}];
-  setDoc(doc(db,"players",playerId),{[field]:arr},{merge:true});$(inputId).value="";
-}
-function removeCustom(field,id){
-  const arr=((rec&&rec[field])||[]).filter(x=>x.id!==id);
-  setDoc(doc(db,"players",playerId),{[field]:arr},{merge:true});
-}
-$("addPlayerBtn").onclick=()=>addCustom("custom","addPlayerIn");
-$("addCoachBtn").onclick=()=>addCustom("customCoach","addCoachIn");
-$("addPlayerIn").addEventListener("keydown",e=>{if(e.key==="Enter")addCustom("custom","addPlayerIn")});
-$("addCoachIn").addEventListener("keydown",e=>{if(e.key==="Enter")addCustom("customCoach","addCoachIn")});
+const escAttr=s=>s.replace(/"/g,"&quot;");
+function curRec(list){return list==="player"?recPlayer:recCoach}
+function curRef(list){return list==="player"?doc(db,"players",playerId):doc(db,"coaches",coachId)}
 
-document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");
-  ["player","coach","team"].forEach(p=>$("panel-"+p).classList.add("hide"));
-  $("panel-"+t.dataset.tab).classList.remove("hide");
-});
-
-function renderList(list,checked,bodyId,pctId,barId,field,customField,custom){
+function renderList(list,rec,bodyId,pctId,barId,ref){
+  const checked=rec.checked||{}, deleted=rec.deleted||{}, custom=rec.custom||{};
   let html="",done=0,total=0;
   for(const[sec,items]of Object.entries(PACKING[list])){
-    html+=`<div class="seccard"><div class="sec-h">${sec}</div>`;
+    html+=`<div class="seccard" data-sec="${escAttr(sec)}"><div class="sec-h">${sec}</div>`;
     for(const it of items){
-      const id=`${list}__${slug(it)}`,on=!!checked[id];if(on)done++;total++;
+      const id=`${list}__${slug(it)}`;
+      if(deleted[id])continue;
+      const on=!!checked[id];if(on)done++;total++;
       const flag=it.startsWith("★"),label=flag?it.slice(1).trim():it;
-      html+=`<label class="item ${on?'done':''}"><input type="checkbox" data-id="${id}" data-field="${field}" ${on?'checked':''}>
-        <span class="${flag?'flag':''}">${flag?'★ ':''}${label}</span></label>`;
+      html+=`<label class="item ${on?'done':''}"><input type="checkbox" data-id="${id}" ${on?'checked':''}>
+        <span class="${flag?'flag':''}">${flag?'★ ':''}${label}</span><button class="rm" data-del="${id}" title="Delete">×</button></label>`;
+      if(list==="player" && it.startsWith("Padlock")){
+        html+=`<div class="combo"><span>Combo</span><input class="comboIn" placeholder="e.g. 12-24-08" value="${escAttr(rec.padlockCombo||'')}" maxlength="30"></div>`;
+      }
     }
+    (custom[sec]||[]).forEach(c=>{const id="cust__"+c.id,on=!!checked[id];if(on)done++;total++;
+      html+=`<label class="item ${on?'done':''}"><input type="checkbox" data-id="${id}" ${on?'checked':''}>
+        <span>${c.label}</span><button class="rm" data-rmc="${c.id}" data-sec="${escAttr(sec)}" title="Delete">×</button></label>`;});
+    html+=`<div class="addmini"><input class="addInp" data-sec="${escAttr(sec)}" placeholder="Add to ${sec}…" maxlength="40"><button class="addBtn" data-sec="${escAttr(sec)}" title="Add">+</button></div>`;
     html+=`</div>`;
   }
-  // custom items section
-  let ch="";
-  custom.forEach(c=>{const id="cust__"+c.id,on=!!checked[id];if(on)done++;total++;
-    ch+=`<label class="item ${on?'done':''}"><input type="checkbox" data-id="${id}" data-field="${field}" ${on?'checked':''}>
-      <span>${c.label}</span><button class="rm" data-rm="${c.id}" data-cf="${customField}" title="Remove">×</button></label>`;});
-  html+=`<div class="seccard"><div class="sec-h">My Items</div>${ch||'<div class="note" style="margin:2px 0">Add your own below.</div>'}</div>`;
-
   $(bodyId).innerHTML=html;
   const pct=total?Math.round(done/total*100):0;$(pctId).textContent=pct+"%";$(barId).style.width=pct+"%";
-  $(bodyId).querySelectorAll("input").forEach(cb=>cb.onchange=()=>
-    setDoc(doc(db,"players",playerId),{[cb.dataset.field]:{[cb.dataset.id]:cb.checked},updatedAt:serverTimestamp()},{merge:true}));
-  $(bodyId).querySelectorAll("[data-rm]").forEach(b=>b.onclick=ev=>{ev.preventDefault();removeCustom(b.dataset.cf,b.dataset.rm)});
+
+  $(bodyId).querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.onchange=()=>
+    setDoc(ref,{checked:{[cb.dataset.id]:cb.checked},updatedAt:serverTimestamp()},{merge:true}));
+  $(bodyId).querySelectorAll("[data-del]").forEach(b=>b.onclick=ev=>{ev.preventDefault();
+    setDoc(ref,{deleted:{[b.dataset.del]:true},updatedAt:serverTimestamp()},{merge:true});});
+  $(bodyId).querySelectorAll("[data-rmc]").forEach(b=>b.onclick=ev=>{ev.preventDefault();
+    const sec=b.dataset.sec,arr=((custom[sec]||[]).filter(x=>x.id!==b.dataset.rmc));
+    setDoc(ref,{custom:{[sec]:arr}},{merge:true});});
+  $(bodyId).querySelectorAll(".addBtn").forEach(b=>b.onclick=()=>{
+    const sec=b.dataset.sec,inp=b.previousElementSibling,v=inp.value.trim();if(!v)return;
+    const arr=[...(custom[sec]||[]),{id:"c-"+Date.now(),label:v}];
+    setDoc(ref,{custom:{[sec]:arr}},{merge:true});});
+  $(bodyId).querySelectorAll(".addInp").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")i.nextElementSibling.click()}));
+  const cm=$(bodyId).querySelector(".comboIn");
+  if(cm)cm.addEventListener("blur",()=>setDoc(ref,{padlockCombo:cm.value.trim()},{merge:true}));
 }
 
 function renderCommunity(map){
+  const myName=coachId?(COACHES.find(n=>slug(n)===coachId)):(ROSTER.find(n=>slug(n)===playerId));
+  const myKey=coachId?("coach:"+coachId):("player:"+playerId);
   let html="";
   for(const label of COMMUNITY){
-    const id=slug(label),c=map[id],mine=c&&c.byPlayer===playerId,taken=c&&c.byPlayer;
+    const id=slug(label),c=map[id],mine=c&&c.byKey===myKey,taken=c&&c.byKey;
     html+=`<div class="ci ${mine?'mine':''}"><div><div class="nm">${label}</div>
       ${taken?`<div class="by">${mine?'You — got it':'Bringing: '+(c.byName||'someone')}</div>`:''}</div>
       ${mine?`<button class="btn btn-rel" data-rel="${id}">Release</button>`
@@ -435,31 +471,32 @@ function renderCommunity(map){
         :`<button class="btn btn-claim" data-claim="${id}" data-label="${label}">I'll bring it</button>`}</div>`;
   }
   $("commBody").innerHTML=html;
-  $("commBody").querySelectorAll("[data-claim]").forEach(b=>b.onclick=()=>claim(b.dataset.claim,b.dataset.label));
+  $("commBody").querySelectorAll("[data-claim]").forEach(b=>b.onclick=()=>claim(b.dataset.claim,b.dataset.label,myKey,myName));
   $("commBody").querySelectorAll("[data-rel]").forEach(b=>b.onclick=()=>release(b.dataset.rel));
 }
-async function claim(id,label){
-  const ref=doc(db,"community",id),name=ROSTER.find(n=>slug(n)===playerId)||playerId;
+async function claim(id,label,myKey,myName){
+  const ref=doc(db,"community",id);
   try{await runTransaction(db,async tx=>{const s=await tx.get(ref);
-    if(s.exists()&&s.data().byPlayer)throw new Error("Just claimed by someone else.");
-    tx.set(ref,{label,byPlayer:playerId,byName:name,at:serverTimestamp()});});}
+    if(s.exists()&&s.data().byKey)throw new Error("Just claimed by someone else.");
+    tx.set(ref,{label,byKey:myKey,byName:myName,at:serverTimestamp()});});}
   catch(e){alert(e.message)}
 }
-async function release(id){await setDoc(doc(db,"community",id),{byPlayer:null,byName:null,at:serverTimestamp()},{merge:true})}
+async function release(id){await setDoc(doc(db,"community",id),{byKey:null,byName:null,at:serverTimestamp()},{merge:true})}
 
-function renderDash(rows){
+function renderPlayerDash(rows){
   const byId={};rows.forEach(r=>byId[r.id]=r);
   let ph='<table><thead><tr><th>Player</th><th>Packed</th></tr></thead><tbody>';
   ROSTER.forEach(n=>{const r=byId[slug(n)]||{};const done=Object.values(r.checked||{}).filter(Boolean).length;
     const pct=Math.round(done/totalFor("player")*100)||0;
     ph+=`<tr><td>${n}</td><td><span class="mini"><i style="width:${pct}%"></i></span> ${pct}%</td></tr>`;});
   $("dashPlayers").innerHTML=ph+'</tbody></table>';
-  const coaches=rows.filter(r=>r.isCoach);
-  if(!coaches.length){$("dashCoaches").innerHTML='<div class="empty">No coaches flagged yet. Coaches: tick the box on the Coach tab.</div>';return}
-  let ch='<table><thead><tr><th>Coach (player)</th><th>Packed</th></tr></thead><tbody>';
-  coaches.forEach(r=>{const done=Object.values(r.coachChecked||{}).filter(Boolean).length;
+}
+function renderCoachDash(rows){
+  const byId={};rows.forEach(r=>byId[r.id]=r);
+  let ch='<table><thead><tr><th>Coach</th><th>Packed</th></tr></thead><tbody>';
+  COACHES.forEach(n=>{const r=byId[slug(n)]||{};const done=Object.values(r.checked||{}).filter(Boolean).length;
     const pct=Math.round(done/totalFor("coach")*100)||0;
-    ch+=`<tr><td>${r.name||r.id}</td><td><span class="mini"><i style="width:${pct}%"></i></span> ${pct}%</td></tr>`;});
+    ch+=`<tr><td>${n}</td><td><span class="mini"><i style="width:${pct}%"></i></span> ${pct}%</td></tr>`;});
   $("dashCoaches").innerHTML=ch+'</tbody></table>';
 }
 </script>
