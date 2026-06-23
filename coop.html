@@ -12,10 +12,10 @@
     --ink:#13202e;--muted:#5a6b7b;--line:#e3ddd0;--good:#2e8b57;--card:#fff}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased}
-  .wrap{max-width:760px;margin:0 auto;padding:0 16px 80px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 16px 80px}
   header{background:var(--navy);position:relative;overflow:hidden}
   .chev{height:10px;background:repeating-linear-gradient(115deg,var(--red) 0 26px,transparent 26px 34px)}
-  .head-in{padding:20px 16px 22px;max-width:760px;margin:0 auto}
+  .head-in{padding:20px 16px 22px;max-width:1080px;margin:0 auto}
   h1{font-family:'Anton',sans-serif;color:#fff;font-size:clamp(28px,7vw,44px);line-height:.95;text-transform:uppercase}
   h1 .acc{color:var(--red)}
   .sub{color:#bcd0e2;font-size:13px;margin-top:6px;letter-spacing:.04em}
@@ -23,32 +23,56 @@
   .who b{font-weight:600}
   .who .lnk{background:transparent;border:1px solid #3a5571;color:#cfe0ee;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer}
   .who .lnk:hover{background:#1c3d5a}
-  nav.tabs{display:flex;gap:4px;background:var(--navy-2);padding:6px}
+  nav.tabs{display:flex;gap:4px;background:var(--navy-2);padding:6px;max-width:1080px;margin:0 auto}
   .tab{flex:1;text-align:center;font-family:'Anton',sans-serif;letter-spacing:.5px;text-transform:uppercase;
     font-size:13px;color:#9fb6c9;padding:11px 6px;border:none;background:transparent;cursor:pointer;border-radius:7px}
   .tab.active{background:var(--cream);color:var(--navy)}
   .tab:focus-visible{outline:2px solid var(--red);outline-offset:2px}
   .panel{padding-top:18px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
-  .prog-row{display:flex;align-items:center;gap:12px;margin-bottom:6px}
-  .prog-row .lbl{font-family:'Anton',sans-serif;font-size:15px;letter-spacing:.4px}
-  .prog-row .pct{margin-left:auto;font-weight:700;color:var(--navy);font-size:14px}
+
+  /* list shell with vertical side label (echoes the printed guide) */
+  .listwrap{display:flex;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
+  .vband{background:var(--navy);color:#fff;writing-mode:vertical-rl;transform:rotate(180deg);
+    font-family:'Anton',sans-serif;font-size:clamp(20px,3vw,30px);text-transform:uppercase;letter-spacing:2px;
+    display:flex;align-items:center;justify-content:center;padding:16px 8px;flex:0 0 auto}
+  .listmain{flex:1;min-width:0;padding:14px}
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+  .prog{flex:1;min-width:180px}
+  .prog .prog-row{display:flex;align-items:center;gap:10px;margin-bottom:5px}
+  .prog .lbl{font-family:'Anton',sans-serif;font-size:14px;letter-spacing:.4px}
+  .prog .pct{margin-left:auto;font-weight:700;color:var(--navy);font-size:14px}
   .bar{height:9px;background:#eee6d6;border-radius:99px;overflow:hidden}
   .bar>i{display:block;height:100%;background:var(--red);width:0;transition:width .25s}
-  .note{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .printbtn{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-weight:600;font-size:13px;cursor:pointer}
+  .printbtn:hover{background:var(--navy-2)}
+
+  .grid{display:grid;grid-template-columns:1fr;gap:12px}
+  @media(min-width:680px){.grid{grid-template-columns:1fr 1fr}}
+  @media(min-width:1000px){.grid{grid-template-columns:1fr 1fr 1fr}}
+  .seccard{border:1px solid var(--line);border-radius:10px;padding:10px 12px;break-inside:avoid}
   .sec-h{font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.6px;color:var(--navy);
-    font-size:14px;margin:0 0 8px;display:flex;align-items:center;gap:8px}
-  .sec-h::before{content:"";width:14px;height:3px;background:var(--red)}
-  label.item{display:flex;align-items:flex-start;gap:11px;padding:9px 8px;border-radius:8px;cursor:pointer;font-size:15px;line-height:1.3}
+    font-size:13px;margin:0 0 6px;display:flex;align-items:center;gap:8px}
+  .sec-h::before{content:"";width:12px;height:3px;background:var(--red)}
+  label.item{display:flex;align-items:flex-start;gap:9px;padding:5px 4px;border-radius:7px;cursor:pointer;font-size:14px;line-height:1.25}
   label.item:hover{background:#faf7ef}
-  label.item input{appearance:none;-webkit-appearance:none;width:21px;height:21px;border:2px solid #c3cad2;
-    border-radius:5px;flex:0 0 auto;margin-top:1px;cursor:pointer;position:relative;background:#fff}
+  label.item input{appearance:none;-webkit-appearance:none;width:18px;height:18px;border:2px solid #9aa6b0;
+    border-radius:4px;flex:0 0 auto;margin-top:1px;cursor:pointer;position:relative;background:#fff;print-color-adjust:exact;-webkit-print-color-adjust:exact}
   label.item input:checked{background:var(--red);border-color:var(--red)}
-  label.item input:checked::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;
+  label.item input:checked::after{content:"";position:absolute;left:5px;top:1px;width:5px;height:9px;
     border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
   label.item input:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
   label.item.done span{color:#9aa6b0;text-decoration:line-through}
   .flag{color:var(--red);font-weight:700}
+  .rm{margin-left:auto;border:none;background:none;color:#c3cad2;cursor:pointer;font-size:15px;line-height:1;padding:0 4px}
+  .rm:hover{color:var(--red)}
+  .addrow{display:flex;gap:8px;margin-top:8px}
+  .addrow input{flex:1;padding:9px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:inherit}
+  .addrow button{background:var(--red);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer}
+
+  .print-head{display:none}
+
+  /* community + dash */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
   .ci{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:#fff}
   .ci .nm{font-weight:600;font-size:15px}
   .ci .by{font-size:12.5px;color:var(--muted);margin-top:2px}
@@ -57,13 +81,18 @@
   .btn-claim{background:var(--red);color:#fff}.btn-claim:hover{background:var(--red-d)}
   .btn-rel{background:#fff;border:1px solid var(--line);color:var(--muted)}
   .badge{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#fff;background:#9aa6b0;padding:3px 8px;border-radius:99px;margin-left:auto}
+  .dash-h{font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.6px;color:var(--navy);font-size:14px;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+  .dash-h::before{content:"";width:14px;height:3px;background:var(--red)}
   table{width:100%;border-collapse:collapse;font-size:14px}
   th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}
   th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
   td .mini{height:7px;width:84px;background:#eee6d6;border-radius:99px;overflow:hidden;display:inline-block;vertical-align:middle}
   td .mini>i{display:block;height:100%;background:var(--red)}
-  .toggle{display:flex;align-items:center;gap:10px;margin-top:4px}
+  .note{font-size:12.5px;color:var(--muted);margin:6px 0;line-height:1.5}
+  .toggle{display:flex;align-items:center;gap:10px;margin:4px 0 0}
   .toggle input{width:20px;height:20px;accent-color:var(--red)}
+
+  /* auth screens */
   .field{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;font-size:15px;margin-bottom:10px;font-family:inherit}
   .field:focus{outline:2px solid var(--navy);border-color:var(--navy)}
   .center{min-height:78vh;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -72,18 +101,39 @@
   .box p{color:var(--muted);font-size:14px;margin:6px 0 18px}
   .btn-primary{width:100%;background:var(--red);color:#fff;border:none;padding:12px;border-radius:9px;font-weight:700;font-size:15px;cursor:pointer}
   .btn-primary:hover{background:var(--red-d)}
-  .btn-google{width:100%;background:#fff;border:1px solid var(--line);padding:11px;border-radius:9px;font-weight:600;
-    cursor:pointer;display:flex;gap:9px;align-items:center;justify-content:center;margin-bottom:14px}
+  .btn-google{width:100%;background:#fff;border:1px solid var(--line);padding:11px;border-radius:9px;font-weight:600;cursor:pointer;display:flex;gap:9px;align-items:center;justify-content:center;margin-bottom:14px}
   .or{text-align:center;color:var(--muted);font-size:12px;margin:6px 0 12px}
   .toglink{background:none;border:none;color:var(--navy);font-weight:600;cursor:pointer;font-size:13px}
   .err{color:var(--red);font-size:13px;margin-top:6px;min-height:18px}
   .roster{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
-  .rbtn{padding:13px 10px;border:1px solid var(--line);background:#fff;border-radius:10px;font-weight:600;
-    font-size:15px;cursor:pointer;color:var(--navy);text-align:center}
+  .rbtn{padding:13px 10px;border:1px solid var(--line);background:#fff;border-radius:10px;font-weight:600;font-size:15px;cursor:pointer;color:var(--navy);text-align:center}
   .rbtn:hover{border-color:var(--red);background:#fff7f6}
   .hide{display:none!important}
   .empty{color:var(--muted);font-size:14px;text-align:center;padding:18px}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+  /* PRINT — one page, looks like the guide, with player name */
+  @media print{
+    @page{size:portrait;margin:10mm}
+    body{background:#fff}
+    header,nav.tabs,.who,.topbar,.addrow,.rm,.note{display:none!important}
+    .wrap{padding:0;max-width:none}
+    .panel{padding:0}
+    #panel-team{display:none!important}
+    .listwrap{border:none;margin:0}
+    .vband{padding:10px 6px;font-size:22px}
+    .listmain{padding:0 0 0 10px}
+    .print-head{display:block;margin-bottom:8px}
+    .print-head .pn{font-family:'Anton',sans-serif;font-size:20px;color:var(--navy);text-transform:uppercase}
+    .print-head .pt{font-size:12px;color:var(--muted)}
+    .grid{grid-template-columns:1fr 1fr 1fr;gap:6px}
+    .seccard{padding:6px 8px}
+    .sec-h{font-size:11px}
+    label.item{font-size:11px;padding:2px 2px}
+    label.item input{width:13px;height:13px}
+    label.item input:checked::after{left:3.5px;top:0;width:4px;height:7px}
+    .flag{color:#000}
+  }
 </style>
 </head>
 <body>
@@ -148,48 +198,52 @@
   <div class="wrap">
 
     <section class="panel" id="panel-player">
-      <div class="card">
-        <div class="prog-row"><span class="lbl">Player packing</span><span class="pct" id="ppct">0%</span></div>
-        <div class="bar"><i id="pbar"></i></div>
-        <div class="note">Checks save automatically and sync to every login on this player.</div>
+      <div class="listwrap">
+        <div class="vband">Player Packing List</div>
+        <div class="listmain">
+          <div class="print-head"><div class="pn" id="pnPlayer"></div><div class="pt">Player Packing List · Cooperstown 2025</div></div>
+          <div class="topbar">
+            <div class="prog"><div class="prog-row"><span class="lbl">Player packing</span><span class="pct" id="ppct">0%</span></div><div class="bar"><i id="pbar"></i></div></div>
+            <button class="printbtn" id="printPlayer">Print</button>
+          </div>
+          <div class="grid" id="playerBody"></div>
+          <div class="addrow"><input id="addPlayerIn" placeholder="Add your own item…" maxlength="40"><button id="addPlayerBtn">Add</button></div>
+        </div>
       </div>
-      <div id="playerBody"></div>
     </section>
 
     <section class="panel hide" id="panel-coach">
-      <div class="card">
-        <div class="prog-row"><span class="lbl">Coach packing</span><span class="pct" id="cpct">0%</span></div>
-        <div class="bar"><i id="cbar"></i></div>
-        <div class="toggle">
-          <input type="checkbox" id="isCoach">
-          <label for="isCoach" style="font-size:14px;font-weight:600">I'm a coach on this team (counts my coach packing on the Team board)</label>
+      <div class="listwrap">
+        <div class="vband">Coach Packing List</div>
+        <div class="listmain">
+          <div class="print-head"><div class="pn" id="pnCoach"></div><div class="pt">Coach Packing List · Cooperstown 2025</div></div>
+          <div class="topbar">
+            <div class="prog"><div class="prog-row"><span class="lbl">Coach packing</span><span class="pct" id="cpct">0%</span></div><div class="bar"><i id="cbar"></i></div></div>
+            <button class="printbtn" id="printCoach">Print</button>
+          </div>
+          <div class="toggle"><input type="checkbox" id="isCoach"><label for="isCoach" style="font-size:13px;font-weight:600">I'm a coach (count my coach packing on the Team board)</label></div>
+          <div class="note">Open to everyone as reference. Only flagged coaches show on the Team roll-up.</div>
+          <div class="grid" id="coachBody"></div>
+          <div class="addrow"><input id="addCoachIn" placeholder="Add your own item…" maxlength="40"><button id="addCoachBtn">Add</button></div>
         </div>
-        <div class="note">Open to everyone as reference — some families bring a few of these for their own kid too. Only flagged coaches show on the Team roll-up.</div>
       </div>
-      <div id="coachBody"></div>
     </section>
 
     <section class="panel hide" id="panel-team">
       <div class="card">
-        <div class="sec-h">Share board</div>
-        <div class="note" style="margin-top:0 0 10px">Claim what you'll bring so we don't double up. Live for everyone.</div>
+        <div class="dash-h">Share board</div>
+        <div class="note" style="margin-top:0">Claim what you'll bring so we don't double up. Live for everyone.</div>
         <div id="commBody"></div>
       </div>
-      <div class="card">
-        <div class="sec-h">Player packing progress</div>
-        <div id="dashPlayers"><div class="empty">Loading…</div></div>
-      </div>
-      <div class="card">
-        <div class="sec-h">Coach packing progress</div>
-        <div id="dashCoaches"><div class="empty">Loading…</div></div>
-      </div>
+      <div class="card"><div class="dash-h">Player packing progress</div><div id="dashPlayers"><div class="empty">Loading…</div></div></div>
+      <div class="card"><div class="dash-h">Coach packing progress</div><div id="dashCoaches"><div class="empty">Loading…</div></div></div>
     </section>
   </div>
 </div>
 
 <script type="module">
 /* ============================================================
-   1) FIREBASE CONFIG — paste yours here
+   1) FIREBASE CONFIG
    ============================================================ */
 const firebaseConfig = {
   apiKey: "AIzaSyD6bsi6aQr0M7h-sAqDusSO7kxCS4VodVY",
@@ -200,12 +254,15 @@ const firebaseConfig = {
   appId: "1:291821684521:web:0215e9992f3f3b89185938"
 };
 
-/* 2) Team code families type once */
+/* 2) Team code */
 const TEAM_CODE = "Wolves26";
 
-/* 3) Coaches — Google emails (lowercase). These logins can switch into & edit ANY kid. */
+/* 3) Coaches — Google emails (lowercase). These logins can edit ANY kid. */
 const COACH_EMAILS = [
-  "joehurst21@gmail.com"
+  "joehurst21@gmail.com",   // Joe H
+  "ccrews@shutts.com",      // Chad C
+  "r_montejano18@yahoo.com",// Rick M
+  "a.waitkus@gmail.com"     // Alex W
 ];
 /* ============================================================ */
 
@@ -218,7 +275,6 @@ import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, runTransacti
 
 const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getFirestore(app);
 
-/* roster (fixed) */
 const ROSTER=["Cuinn C.","Anderson P.","Beckett G.","Maddox M.","Mateo C.","William W.",
   "JP A.","JJ H.","Jack B.","Abraham H.","Greyson G.","Mason H."];
 
@@ -261,13 +317,13 @@ $("emailBtn").onclick=async()=>{const em=$("email").value.trim(),pw=$("pass").va
   catch(e){$("loginErr").textContent=e.message.replace("Firebase:","").trim()}};
 $("signoutBtn").onclick=()=>signOut(auth);
 
-/* team code gate */
+/* team code */
 $("codeBtn").onclick=()=>{
   if($("codeIn").value.trim().toUpperCase()===TEAM_CODE.toUpperCase()){LS.setItem("coop_team","1");route()}
   else $("codeErr").textContent="That code didn't match.";
 };
 
-/* roster picker */
+/* roster */
 function buildRoster(){
   $("rosterGrid").innerHTML="";
   ROSTER.forEach(n=>{const b=document.createElement("button");b.className="rbtn";b.textContent=n;
@@ -279,7 +335,6 @@ function buildRoster(){
 }
 $("switchKid").onclick=()=>{LS.removeItem("coop_player");route()};
 
-/* show one screen */
 function show(id){["login","gate","picker","app"].forEach(s=>$(s).classList.toggle("hide",s!==id))}
 
 async function route(){
@@ -301,24 +356,41 @@ async function route(){
 
 onAuthStateChanged(auth,u=>{clearSubs();me=u?{uid:u.uid,email:(u.email||"").toLowerCase()}:null;route()});
 
-/* app */
 function startApp(){
   clearSubs();
   const name=ROSTER.find(n=>slug(n)===playerId)||playerId;
-  $("whoKid").textContent=name;
+  $("whoKid").textContent=name;$("pnPlayer").textContent=name;$("pnCoach").textContent=name;
   const ref=doc(db,"players",playerId);
   unsub.push(onSnapshot(ref,snap=>{
-    if(!snap.exists()){setDoc(ref,{name,checked:{},coachChecked:{},isCoach:false,updatedAt:serverTimestamp()});return}
+    if(!snap.exists()){setDoc(ref,{name,checked:{},coachChecked:{},custom:[],customCoach:[],isCoach:false,updatedAt:serverTimestamp()});return}
     rec=snap.data();
     $("isCoach").checked=!!rec.isCoach;
-    renderList("player",rec.checked||{},"playerBody","ppct","pbar","checked");
-    renderList("coach",rec.coachChecked||{},"coachBody","cpct","cbar","coachChecked");
+    renderList("player",rec.checked||{},"playerBody","ppct","pbar","checked","custom",rec.custom||[]);
+    renderList("coach",rec.coachChecked||{},"coachBody","cpct","cbar","coachChecked","customCoach",rec.customCoach||[]);
   }));
   unsub.push(onSnapshot(collection(db,"community"),s=>{const m={};s.forEach(d=>m[d.id]=d.data());renderCommunity(m)}));
   unsub.push(onSnapshot(collection(db,"players"),s=>{const r=[];s.forEach(d=>r.push({id:d.id,...d.data()}));renderDash(r)}));
 }
 
 $("isCoach").onchange=e=>setDoc(doc(db,"players",playerId),{isCoach:e.target.checked},{merge:true});
+$("printPlayer").onclick=()=>window.print();
+$("printCoach").onclick=()=>window.print();
+
+/* add custom items */
+function addCustom(field,inputId){
+  const v=$(inputId).value.trim();if(!v)return;
+  const cur=(rec&&rec[field])||[];
+  const arr=[...cur,{id:"c-"+Date.now(),label:v}];
+  setDoc(doc(db,"players",playerId),{[field]:arr},{merge:true});$(inputId).value="";
+}
+function removeCustom(field,id){
+  const arr=((rec&&rec[field])||[]).filter(x=>x.id!==id);
+  setDoc(doc(db,"players",playerId),{[field]:arr},{merge:true});
+}
+$("addPlayerBtn").onclick=()=>addCustom("custom","addPlayerIn");
+$("addCoachBtn").onclick=()=>addCustom("customCoach","addCoachIn");
+$("addPlayerIn").addEventListener("keydown",e=>{if(e.key==="Enter")addCustom("custom","addPlayerIn")});
+$("addCoachIn").addEventListener("keydown",e=>{if(e.key==="Enter")addCustom("customCoach","addCoachIn")});
 
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
   document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");
@@ -326,10 +398,10 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
   $("panel-"+t.dataset.tab).classList.remove("hide");
 });
 
-function renderList(list,checked,bodyId,pctId,barId,field){
+function renderList(list,checked,bodyId,pctId,barId,field,customField,custom){
   let html="",done=0,total=0;
   for(const[sec,items]of Object.entries(PACKING[list])){
-    html+=`<div class="card"><div class="sec-h">${sec}</div>`;
+    html+=`<div class="seccard"><div class="sec-h">${sec}</div>`;
     for(const it of items){
       const id=`${list}__${slug(it)}`,on=!!checked[id];if(on)done++;total++;
       const flag=it.startsWith("★"),label=flag?it.slice(1).trim():it;
@@ -338,10 +410,18 @@ function renderList(list,checked,bodyId,pctId,barId,field){
     }
     html+=`</div>`;
   }
+  // custom items section
+  let ch="";
+  custom.forEach(c=>{const id="cust__"+c.id,on=!!checked[id];if(on)done++;total++;
+    ch+=`<label class="item ${on?'done':''}"><input type="checkbox" data-id="${id}" data-field="${field}" ${on?'checked':''}>
+      <span>${c.label}</span><button class="rm" data-rm="${c.id}" data-cf="${customField}" title="Remove">×</button></label>`;});
+  html+=`<div class="seccard"><div class="sec-h">My Items</div>${ch||'<div class="note" style="margin:2px 0">Add your own below.</div>'}</div>`;
+
   $(bodyId).innerHTML=html;
   const pct=total?Math.round(done/total*100):0;$(pctId).textContent=pct+"%";$(barId).style.width=pct+"%";
   $(bodyId).querySelectorAll("input").forEach(cb=>cb.onchange=()=>
     setDoc(doc(db,"players",playerId),{[cb.dataset.field]:{[cb.dataset.id]:cb.checked},updatedAt:serverTimestamp()},{merge:true}));
+  $(bodyId).querySelectorAll("[data-rm]").forEach(b=>b.onclick=ev=>{ev.preventDefault();removeCustom(b.dataset.cf,b.dataset.rm)});
 }
 
 function renderCommunity(map){
@@ -369,13 +449,11 @@ async function release(id){await setDoc(doc(db,"community",id),{byPlayer:null,by
 
 function renderDash(rows){
   const byId={};rows.forEach(r=>byId[r.id]=r);
-  // players
   let ph='<table><thead><tr><th>Player</th><th>Packed</th></tr></thead><tbody>';
   ROSTER.forEach(n=>{const r=byId[slug(n)]||{};const done=Object.values(r.checked||{}).filter(Boolean).length;
     const pct=Math.round(done/totalFor("player")*100)||0;
     ph+=`<tr><td>${n}</td><td><span class="mini"><i style="width:${pct}%"></i></span> ${pct}%</td></tr>`;});
   $("dashPlayers").innerHTML=ph+'</tbody></table>';
-  // coaches
   const coaches=rows.filter(r=>r.isCoach);
   if(!coaches.length){$("dashCoaches").innerHTML='<div class="empty">No coaches flagged yet. Coaches: tick the box on the Coach tab.</div>';return}
   let ch='<table><thead><tr><th>Coach (player)</th><th>Packed</th></tr></thead><tbody>';
