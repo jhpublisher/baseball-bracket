@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cooperstown Coop Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#102a43;--navy-2:#1c3d5a;--red:#d4282b;--red-d:#b01f22;--cream:#f5f2ea;
+    --ink:#13202e;--muted:#5a6b7b;--line:#e3ddd0;--good:#2e8b57;--card:#fff}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px 80px}
+  header{background:var(--navy);position:relative;overflow:hidden}
+  .chev{height:10px;background:repeating-linear-gradient(115deg,var(--red) 0 26px,transparent 26px 34px)}
+  .head-in{padding:20px 16px 22px;max-width:760px;margin:0 auto}
+  h1{font-family:'Anton',sans-serif;color:#fff;font-size:clamp(28px,7vw,44px);line-height:.95;text-transform:uppercase}
+  h1 .acc{color:var(--red)}
+  .sub{color:#bcd0e2;font-size:13px;margin-top:6px;letter-spacing:.04em}
+  .who{color:#fff;font-size:13px;margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .who b{font-weight:600}
+  .who .lnk{background:transparent;border:1px solid #3a5571;color:#cfe0ee;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer}
+  .who .lnk:hover{background:#1c3d5a}
+  nav.tabs{display:flex;gap:4px;background:var(--navy-2);padding:6px}
+  .tab{flex:1;text-align:center;font-family:'Anton',sans-serif;letter-spacing:.5px;text-transform:uppercase;
+    font-size:13px;color:#9fb6c9;padding:11px 6px;border:none;background:transparent;cursor:pointer;border-radius:7px}
+  .tab.active{background:var(--cream);color:var(--navy)}
+  .tab:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+  .panel{padding-top:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+  .prog-row{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .prog-row .lbl{font-family:'Anton',sans-serif;font-size:15px;letter-spacing:.4px}
+  .prog-row .pct{margin-left:auto;font-weight:700;color:var(--navy);font-size:14px}
+  .bar{height:9px;background:#eee6d6;border-radius:99px;overflow:hidden}
+  .bar>i{display:block;height:100%;background:var(--red);width:0;transition:width .25s}
+  .note{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .sec-h{font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.6px;color:var(--navy);
+    font-size:14px;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+  .sec-h::before{content:"";width:14px;height:3px;background:var(--red)}
+  label.item{display:flex;align-items:flex-start;gap:11px;padding:9px 8px;border-radius:8px;cursor:pointer;font-size:15px;line-height:1.3}
+  label.item:hover{background:#faf7ef}
+  label.item input{appearance:none;-webkit-appearance:none;width:21px;height:21px;border:2px solid #c3cad2;
+    border-radius:5px;flex:0 0 auto;margin-top:1px;cursor:pointer;position:relative;background:#fff}
+  label.item input:checked{background:var(--red);border-color:var(--red)}
+  label.item input:checked::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;
+    border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+  label.item input:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+  label.item.done span{color:#9aa6b0;text-decoration:line-through}
+  .flag{color:var(--red);font-weight:700}
+  .ci{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:#fff}
+  .ci .nm{font-weight:600;font-size:15px}
+  .ci .by{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .ci.mine{border-color:var(--good);background:#f1f9f4}
+  .btn{border:none;border-radius:8px;padding:8px 14px;font-weight:600;font-size:13px;cursor:pointer}
+  .btn-claim{background:var(--red);color:#fff}.btn-claim:hover{background:var(--red-d)}
+  .btn-rel{background:#fff;border:1px solid var(--line);color:var(--muted)}
+  .badge{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#fff;background:#9aa6b0;padding:3px 8px;border-radius:99px;margin-left:auto}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  td .mini{height:7px;width:84px;background:#eee6d6;border-radius:99px;overflow:hidden;display:inline-block;vertical-align:middle}
+  td .mini>i{display:block;height:100%;background:var(--red)}
+  .toggle{display:flex;align-items:center;gap:10px;margin-top:4px}
+  .toggle input{width:20px;height:20px;accent-color:var(--red)}
+  .field{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;font-size:15px;margin-bottom:10px;font-family:inherit}
+  .field:focus{outline:2px solid var(--navy);border-color:var(--navy)}
+  .center{min-height:78vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px;max-width:400px;width:100%}
+  .box h2{font-family:'Anton',sans-serif;color:var(--navy);font-size:24px;text-transform:uppercase;letter-spacing:.5px}
+  .box p{color:var(--muted);font-size:14px;margin:6px 0 18px}
+  .btn-primary{width:100%;background:var(--red);color:#fff;border:none;padding:12px;border-radius:9px;font-weight:700;font-size:15px;cursor:pointer}
+  .btn-primary:hover{background:var(--red-d)}
+  .btn-google{width:100%;background:#fff;border:1px solid var(--line);padding:11px;border-radius:9px;font-weight:600;
+    cursor:pointer;display:flex;gap:9px;align-items:center;justify-content:center;margin-bottom:14px}
+  .or{text-align:center;color:var(--muted);font-size:12px;margin:6px 0 12px}
+  .toglink{background:none;border:none;color:var(--navy);font-weight:600;cursor:pointer;font-size:13px}
+  .err{color:var(--red);font-size:13px;margin-top:6px;min-height:18px}
+  .roster{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+  .rbtn{padding:13px 10px;border:1px solid var(--line);background:#fff;border-radius:10px;font-weight:600;
+    font-size:15px;cursor:pointer;color:var(--navy);text-align:center}
+  .rbtn:hover{border-color:var(--red);background:#fff7f6}
+  .hide{display:none!important}
+  .empty{color:var(--muted);font-size:14px;text-align:center;padding:18px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="center">
+  <div class="box">
+    <h2>Coop Hub</h2>
+    <p id="loginSub">Sign in — both parents can use the same kid. One account per person is fine.</p>
+    <button class="btn-google" id="googleBtn">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5h-1.9V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22 22-9.8 22-22c0-1.5-.2-2.6-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 46c5.5 0 10.5-2.1 14.3-5.6l-6.6-5.6C29.7 36.5 27 37.5 24 37.5c-5.2 0-9.6-3.3-11.2-7.9l-6.5 5C9.6 41.6 16.2 46 24 46z"/><path fill="#1976D2" d="M43.6 20.5H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.4l6.6 5.6C41.4 36.3 44 30.7 44 24c0-1.5-.2-2.6-.4-3.5z"/></svg>
+      Continue with Google
+    </button>
+    <div class="or">— or use email —</div>
+    <input class="field" id="email" type="email" placeholder="Email" autocomplete="email">
+    <input class="field" id="pass" type="password" placeholder="Password" autocomplete="current-password">
+    <button class="btn-primary" id="emailBtn">Sign in</button>
+    <div class="err" id="loginErr"></div>
+    <div style="text-align:center;margin-top:8px"><button class="toglink" id="toggleMode">New here? Create an account</button></div>
+  </div>
+</div>
+
+<!-- TEAM CODE -->
+<div id="gate" class="center hide">
+  <div class="box">
+    <h2>Team code</h2>
+    <p>Enter the code your coach shared. One time on this device.</p>
+    <input class="field" id="codeIn" placeholder="Team code" autocomplete="off">
+    <button class="btn-primary" id="codeBtn">Continue</button>
+    <div class="err" id="codeErr"></div>
+  </div>
+</div>
+
+<!-- PICK KID -->
+<div id="picker" class="center hide">
+  <div class="box">
+    <h2>Pick your player</h2>
+    <p>Choose your kid. Both parents pick the same one — it stays in sync.</p>
+    <div class="roster" id="rosterGrid"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hide">
+  <header>
+    <div class="chev"></div>
+    <div class="head-in">
+      <h1>Cooperstown <span class="acc">Coop Hub</span></h1>
+      <div class="sub">PLAYER · COACH · TEAM</div>
+      <div class="who">
+        <span>Player: <b id="whoKid"></b></span>
+        <button class="lnk" id="switchKid">Switch player</button>
+        <button class="lnk" id="signoutBtn">Sign out</button>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button class="tab active" data-tab="player">Player</button>
+      <button class="tab" data-tab="coach">Coach</button>
+      <button class="tab" data-tab="team">Team</button>
+    </nav>
+  </header>
+  <div class="wrap">
+
+    <section class="panel" id="panel-player">
+      <div class="card">
+        <div class="prog-row"><span class="lbl">Player packing</span><span class="pct" id="ppct">0%</span></div>
+        <div class="bar"><i id="pbar"></i></div>
+        <div class="note">Checks save automatically and sync to every login on this player.</div>
+      </div>
+      <div id="playerBody"></div>
+    </section>
+
+    <section class="panel hide" id="panel-coach">
+      <div class="card">
+        <div class="prog-row"><span class="lbl">Coach packing</span><span class="pct" id="cpct">0%</span></div>
+        <div class="bar"><i id="cbar"></i></div>
+        <div class="toggle">
+          <input type="checkbox" id="isCoach">
+          <label for="isCoach" style="font-size:14px;font-weight:600">I'm a coach on this team (counts my coach packing on the Team board)</label>
+        </div>
+        <div class="note">Open to everyone as reference — some families bring a few of these for their own kid too. Only flagged coaches show on the Team roll-up.</div>
+      </div>
+      <div id="coachBody"></div>
+    </section>
+
+    <section class="panel hide" id="panel-team">
+      <div class="card">
+        <div class="sec-h">Share board</div>
+        <div class="note" style="margin-top:0 0 10px">Claim what you'll bring so we don't double up. Live for everyone.</div>
+        <div id="commBody"></div>
+      </div>
+      <div class="card">
+        <div class="sec-h">Player packing progress</div>
+        <div id="dashPlayers"><div class="empty">Loading…</div></div>
+      </div>
+      <div class="card">
+        <div class="sec-h">Coach packing progress</div>
+        <div id="dashCoaches"><div class="empty">Loading…</div></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script type="module">
+/* ============================================================
+   1) FIREBASE CONFIG — paste yours here
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyD6bsi6aQr0M7h-sAqDusSO7kxCS4VodVY",
+  authDomain: "baseball-lineup-84e74.firebaseapp.com",
+  projectId: "baseball-lineup-84e74",
+  storageBucket: "baseball-lineup-84e74.firebasestorage.app",
+  messagingSenderId: "291821684521",
+  appId: "1:291821684521:web:0215e9992f3f3b89185938"
+};
+
+/* 2) Team code families type once */
+const TEAM_CODE = "Wolves26";
+
+/* 3) Coaches — Google emails (lowercase). These logins can switch into & edit ANY kid. */
+const COACH_EMAILS = [
+  "joehurst21@gmail.com"
+];
+/* ============================================================ */
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
+         createUserWithEmailAndPassword, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, runTransaction, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getFirestore(app);
+
+/* roster (fixed) */
+const ROSTER=["Cuinn C.","Anderson P.","Beckett G.","Maddox M.","Mateo C.","William W.",
+  "JP A.","JJ H.","Jack B.","Abraham H.","Greyson G.","Mason H."];
+
+const PACKING={
+ player:{
+  "Equipment":["Sliding Shorts (2)","Cup","Navy Belt","Red Belt","Sunglasses","Batting Gloves","Catcher's Gear (if applicable)","Equipment Bag","Cleats (NO metal cleats)","White Knicker Pants (2)","Bat","Helmet","Glove(s)"],
+  "Clothing":["Underwear","Socks","T-shirts","Shorts","Pajamas","Flip Flops/Crocs (showering)","Hoodie or Jacket","Swim Trunks (showering)","Sweatpants"],
+  "Personal":["Toothbrush","Toothpaste","Deodorant","Body Wash","Shampoo","Comb/Brush","Lip Balm","Sunscreen","Medication","Bug Spray","Gold Bond Powder/Spray","Mesh Toiletry Bag"],
+  "Other / Misc":["Trading Pins","Pin Towel/Book/Case","Extension Cord","Wiffle Balls","Card Games","Box Fan","Personal/Clip-on Fan","Team Hat & Shirt","Phone Charger","Pillow w/ Pillowcase","Twin Sheet Set","Blanket or Sleeping Bag","2 Towels (microfiber)","2 Washcloths","Flashlight or Headlamp","List of Teams (pin trading)","Rain Poncho/Umbrella","Padlock (2)","Over-the-Door Hook","Fabric Labels / Sharpies","Concession Money","Confidence & Good Attitude","★ BIRTH CERTIFICATE"],
+  "Optional":["5-Gal Bucket w/ Lid","Extra Cleats (rain)","Extra Navy & Red Socks","Refillable Water Bottle","Extra Shoelaces","Shoe Dryer","Cooling Towel","Sleep Mask","Eye Black"]
+ },
+ coach:{
+  "Equipment":["Fungo","Sunglasses","First Aid Kit","Bucket of Balls","Glove"],
+  "Clothing":["Underwear","Pajamas","Sweatpants","Team Hat & Shirt","Flip Flops/Crocs (showering)","Hoodie or Jacket","Swim Trunks (showering)","T-shirts","Shorts","Socks","Shoes"],
+  "Personal":["Toothbrush","Toothpaste","Deodorant","Body Wash","Shampoo","Comb/Brush","Lip Balm","Sunscreen","Medication","Bug Spray","Gold Bond Powder/Spray","Mesh Toiletry Bag"],
+  "Other / Misc":["Padlock (2)","Padlock for Equipment Storage","Box Fan","Extension Cord","Power Strip","Phone Charger","Pillow w/ Pillowcase","Twin Sheet Set","Blanket or Sleeping Bag","Flashlight or Headlamp","Team Cooler","Wagon","Umbrella","Rain Poncho","Over-the-Door Hook","2 Towels (microfiber)","2 Washcloths","Personal/Clip-on Fan","Team Banner","Bungee Cords (banner)","Febreze/Air Freshener","DampRid","Black Sharpie","Silver Sharpie","Zip Ties","Painters Tape","Wiffle Ball Set","★ PAPERWORK"],
+  "Optional":["Chair (outside barracks)","Refillable Water Bottle","King Flat Sheet","Cooling Towel","Sleep Mask","Ear Plugs"]
+ }
+};
+const COMMUNITY=["Box Fans","Bug Spray","Card Games","Doormat / Boot Tray","Extension Cords",
+  "Febreze / Air Freshener","Hand Sanitizer","Power Strips","Shoe Deodorizer","Snacks",
+  "Sunscreen","Team Cooler","Wagon","Wiffle Ball Set","Wiffle Balls"];
+
+const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const totalFor=l=>Object.values(PACKING[l]).reduce((n,a)=>n+a.length,0);
+const $=id=>document.getElementById(id);
+const LS=window.localStorage;
+
+let me=null, playerId=null, rec=null, unsub=[], isCoachUser=false;
+const clearSubs=()=>{unsub.forEach(f=>f());unsub=[]};
+
+/* login */
+let signup=false;
+$("toggleMode").onclick=()=>{signup=!signup;
+  $("emailBtn").textContent=signup?"Create account":"Sign in";
+  $("toggleMode").textContent=signup?"Have an account? Sign in":"New here? Create an account";};
+$("googleBtn").onclick=async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(e){$("loginErr").textContent=e.message}};
+$("emailBtn").onclick=async()=>{const em=$("email").value.trim(),pw=$("pass").value;$("loginErr").textContent="";
+  try{signup?await createUserWithEmailAndPassword(auth,em,pw):await signInWithEmailAndPassword(auth,em,pw)}
+  catch(e){$("loginErr").textContent=e.message.replace("Firebase:","").trim()}};
+$("signoutBtn").onclick=()=>signOut(auth);
+
+/* team code gate */
+$("codeBtn").onclick=()=>{
+  if($("codeIn").value.trim().toUpperCase()===TEAM_CODE.toUpperCase()){LS.setItem("coop_team","1");route()}
+  else $("codeErr").textContent="That code didn't match.";
+};
+
+/* roster picker */
+function buildRoster(){
+  $("rosterGrid").innerHTML="";
+  ROSTER.forEach(n=>{const b=document.createElement("button");b.className="rbtn";b.textContent=n;
+    b.onclick=async()=>{
+      if(isCoachUser){LS.setItem("coop_player",slug(n));}
+      else{await setDoc(doc(db,"users",me.uid),{email:me.email,playerId:slug(n)},{merge:true});}
+      route();
+    };$("rosterGrid").appendChild(b)});
+}
+$("switchKid").onclick=()=>{LS.removeItem("coop_player");route()};
+
+/* show one screen */
+function show(id){["login","gate","picker","app"].forEach(s=>$(s).classList.toggle("hide",s!==id))}
+
+async function route(){
+  if(!me){show("login");return}
+  if(LS.getItem("coop_team")!=="1"){show("gate");return}
+  isCoachUser=COACH_EMAILS.includes(me.email);
+  if(isCoachUser){
+    playerId=LS.getItem("coop_player");
+    if(!playerId){buildRoster();show("picker");return}
+    $("switchKid").classList.remove("hide");
+  }else{
+    const us=await getDoc(doc(db,"users",me.uid));
+    playerId=us.exists()?us.data().playerId:null;
+    if(!playerId){buildRoster();show("picker");return}
+    $("switchKid").classList.add("hide");
+  }
+  show("app");startApp();
+}
+
+onAuthStateChanged(auth,u=>{clearSubs();me=u?{uid:u.uid,email:(u.email||"").toLowerCase()}:null;route()});
+
+/* app */
+function startApp(){
+  clearSubs();
+  const name=ROSTER.find(n=>slug(n)===playerId)||playerId;
+  $("whoKid").textContent=name;
+  const ref=doc(db,"players",playerId);
+  unsub.push(onSnapshot(ref,snap=>{
+    if(!snap.exists()){setDoc(ref,{name,checked:{},coachChecked:{},isCoach:false,updatedAt:serverTimestamp()});return}
+    rec=snap.data();
+    $("isCoach").checked=!!rec.isCoach;
+    renderList("player",rec.checked||{},"playerBody","ppct","pbar","checked");
+    renderList("coach",rec.coachChecked||{},"coachBody","cpct","cbar","coachChecked");
+  }));
+  unsub.push(onSnapshot(collection(db,"community"),s=>{const m={};s.forEach(d=>m[d.id]=d.data());renderCommunity(m)}));
+  unsub.push(onSnapshot(collection(db,"players"),s=>{const r=[];s.forEach(d=>r.push({id:d.id,...d.data()}));renderDash(r)}));
+}
+
+$("isCoach").onchange=e=>setDoc(doc(db,"players",playerId),{isCoach:e.target.checked},{merge:true});
+
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");
+  ["player","coach","team"].forEach(p=>$("panel-"+p).classList.add("hide"));
+  $("panel-"+t.dataset.tab).classList.remove("hide");
+});
+
+function renderList(list,checked,bodyId,pctId,barId,field){
+  let html="",done=0,total=0;
+  for(const[sec,items]of Object.entries(PACKING[list])){
+    html+=`<div class="card"><div class="sec-h">${sec}</div>`;
+    for(const it of items){
+      const id=`${list}__${slug(it)}`,on=!!checked[id];if(on)done++;total++;
+      const flag=it.startsWith("★"),label=flag?it.slice(1).trim():it;
+      html+=`<label class="item ${on?'done':''}"><input type="checkbox" data-id="${id}" data-field="${field}" ${on?'checked':''}>
+        <span class="${flag?'flag':''}">${flag?'★ ':''}${label}</span></label>`;
+    }
+    html+=`</div>`;
+  }
+  $(bodyId).innerHTML=html;
+  const pct=total?Math.round(done/total*100):0;$(pctId).textContent=pct+"%";$(barId).style.width=pct+"%";
+  $(bodyId).querySelectorAll("input").forEach(cb=>cb.onchange=()=>
+    setDoc(doc(db,"players",playerId),{[cb.dataset.field]:{[cb.dataset.id]:cb.checked},updatedAt:serverTimestamp()},{merge:true}));
+}
+
+function renderCommunity(map){
+  let html="";
+  for(const label of COMMUNITY){
+    const id=slug(label),c=map[id],mine=c&&c.byPlayer===playerId,taken=c&&c.byPlayer;
+    html+=`<div class="ci ${mine?'mine':''}"><div><div class="nm">${label}</div>
+      ${taken?`<div class="by">${mine?'You — got it':'Bringing: '+(c.byName||'someone')}</div>`:''}</div>
+      ${mine?`<button class="btn btn-rel" data-rel="${id}">Release</button>`
+        :taken?`<span class="badge">Taken</span>`
+        :`<button class="btn btn-claim" data-claim="${id}" data-label="${label}">I'll bring it</button>`}</div>`;
+  }
+  $("commBody").innerHTML=html;
+  $("commBody").querySelectorAll("[data-claim]").forEach(b=>b.onclick=()=>claim(b.dataset.claim,b.dataset.label));
+  $("commBody").querySelectorAll("[data-rel]").forEach(b=>b.onclick=()=>release(b.dataset.rel));
+}
+async function claim(id,label){
+  const ref=doc(db,"community",id),name=ROSTER.find(n=>slug(n)===playerId)||playerId;
+  try{await runTransaction(db,async tx=>{const s=await tx.get(ref);
+    if(s.exists()&&s.data().byPlayer)throw new Error("Just claimed by someone else.");
+    tx.set(ref,{label,byPlayer:playerId,byName:name,at:serverTimestamp()});});}
+  catch(e){alert(e.message)}
+}
+async function release(id){await setDoc(doc(db,"community",id),{byPlayer:null,byName:null,at:serverTimestamp()},{merge:true})}
+
+function renderDash(rows){
+  const byId={};rows.forEach(r=>byId[r.id]=r);
+  // players
+  let ph='<table><thead><tr><th>Player</th><th>Packed</th></tr></thead><tbody>';
+  ROSTER.forEach(n=>{const r=byId[slug(n)]||{};const done=Object.values(r.checked||{}).filter(Boolean).length;
+    const pct=Math.round(done/totalFor("player")*100)||0;
+    ph+=`<tr><td>${n}</td><td><span class="mini"><i style="width:${pct}%"></i></span> ${pct}%</td></tr>`;});
+  $("dashPlayers").innerHTML=ph+'</tbody></table>';
+  // coaches
+  const coaches=rows.filter(r=>r.isCoach);
+  if(!coaches.length){$("dashCoaches").innerHTML='<div class="empty">No coaches flagged yet. Coaches: tick the box on the Coach tab.</div>';return}
+  let ch='<table><thead><tr><th>Coach (player)</th><th>Packed</th></tr></thead><tbody>';
+  coaches.forEach(r=>{const done=Object.values(r.coachChecked||{}).filter(Boolean).length;
+    const pct=Math.round(done/totalFor("coach")*100)||0;
+    ch+=`<tr><td>${r.name||r.id}</td><td><span class="mini"><i style="width:${pct}%"></i></span> ${pct}%</td></tr>`;});
+  $("dashCoaches").innerHTML=ch+'</tbody></table>';
+}
+</script>
+</body>
+</html>
