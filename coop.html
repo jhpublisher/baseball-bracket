@@ -72,6 +72,7 @@
   .flag{color:var(--red);font-weight:700}
   .rm{margin-left:auto;border:none;background:none;color:#c3cad2;cursor:pointer;font-size:15px;line-height:1;padding:0 4px}
   .rm:hover{color:var(--red)}
+  .rm.trash{font-size:12px;color:#b8a68f}.rm.trash:hover{color:var(--red)}
   .addmini{display:flex;gap:6px;margin-top:6px;padding:0 4px}
   .addmini input{flex:1;padding:6px 8px;border:1px dashed #c3cad2;border-radius:7px;font-size:13px;font-family:inherit}
   .addmini button{background:var(--red);color:#fff;border:none;border-radius:7px;width:30px;font-size:18px;line-height:1;cursor:pointer}
@@ -463,9 +464,12 @@ function renderList(list,rec,bodyId,pctId,barId,ref){
         }
       }
     }
-    (custom[sec]||[]).forEach(c=>{const id="cust__"+c.id,isStruck=!!deleted[id];
-      if(isStruck){struck+=row(id,c.label,false,true);}
-      else{if(checked[id])done++;total++;active+=row(id,c.label,false,false);}});
+    (custom[sec]||[]).forEach(c=>{const id="cust__"+c.id;
+      if(checked[id])done++;total++;
+      active+=`<label class="item ${checked[id]?'done':''}">
+        <input type="checkbox" data-id="${id}" ${checked[id]?'checked':''}>
+        <span>${c.label}</span>
+        <button class="rm trash" data-delc="${c.id}" data-sec="${escAttr(sec)}" title="Delete permanently">🗑</button></label>`;});
     const addrow=`<div class="addmini"><input class="addInp" data-sec="${escAttr(sec)}" placeholder="Add to ${sec}…" maxlength="40"><button class="addBtn" data-sec="${escAttr(sec)}" title="Add">+</button></div>`;
     html+=active+struck+addrow+`</div>`;
   }
@@ -477,6 +481,10 @@ function renderList(list,rec,bodyId,pctId,barId,ref){
   $(bodyId).querySelectorAll("[data-del]").forEach(b=>b.onclick=ev=>{ev.preventDefault();
     const cur=!!deleted[b.dataset.del];
     setDoc(ref,{deleted:{[b.dataset.del]:!cur},updatedAt:serverTimestamp()},{merge:true});});
+  $(bodyId).querySelectorAll("[data-delc]").forEach(b=>b.onclick=ev=>{ev.preventDefault();
+    if(!confirm("Permanently delete this item you added?"))return;
+    const sec=b.dataset.sec,arr=(custom[sec]||[]).filter(x=>x.id!==b.dataset.delc);
+    setDoc(ref,{custom:{[sec]:arr}},{merge:true});});
   $(bodyId).querySelectorAll(".addBtn").forEach(b=>b.onclick=()=>{
     const sec=b.dataset.sec,inp=b.previousElementSibling,v=inp.value.trim();if(!v)return;
     const arr=[...(custom[sec]||[]),{id:"c-"+Date.now(),label:v}];
