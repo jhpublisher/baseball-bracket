@@ -78,6 +78,13 @@
   .switch button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
   .mgrow{display:flex;align-items:center;gap:8px;padding:7px 4px;font-size:14px;border-bottom:1px solid var(--line)}
   .mgrow .rm{margin-left:auto}
+  .mgtext{flex:1;min-width:0;padding:4px 6px;border-radius:7px;cursor:text;line-height:1.25}
+  .mgtext:hover{background:#faf7ef}
+  .mgtext::after{content:" double-click/tap to edit";font-size:11px;color:#b8a68f;margin-left:8px;font-weight:500}
+  .mgtext.editing{padding:0;background:transparent}
+  .mgtext.editing::after{content:""}
+  .mgEditIn{width:100%;padding:6px 8px;border:1px solid var(--red);border-radius:7px;font-size:14px;font-family:inherit;color:var(--ink);background:#fff}
+  .mgEditIn:focus{outline:2px solid rgba(240,124,30,.25)}
   .tn-note{color:var(--muted);font-size:12px;margin:0 0 8px;line-height:1.4}
   .tn{padding:5px 0;border-top:1px solid var(--line)}
   .tn:first-of-type{border-top:none}
@@ -328,7 +335,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
          createUserWithEmailAndPassword, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, runTransaction, serverTimestamp, increment }
+import { getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc, onSnapshot, collection, writeBatch, runTransaction, serverTimestamp, increment, deleteField }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getFirestore(app);
@@ -377,6 +384,7 @@ const teamItems=()=>((MASTERTEAM&&MASTERTEAM.items)?MASTERTEAM.items:TEAMNEEDS_D
 const totalFor=l=>Object.values(L(l)).reduce((n,a)=>n+a.length,0);
 const $=id=>document.getElementById(id);
 const LS=window.localStorage;
+const isAdmin=()=>!!me&&ADMIN_EMAILS.includes(me.email);
 
 let me=null, playerId=null, coachId=null, recPlayer=null, recCoach=null, unsub=[], isCoachUser=false;
 let selPlayer=null, selCoach=null, manageList="player";
@@ -484,7 +492,7 @@ function startApp(){
   // tab visibility
   $("tabPlayer").classList.toggle("hide",!playerId);
   $("tabCoach").classList.toggle("hide",!coachId);
-  $("tabManage").classList.toggle("hide",!ADMIN_EMAILS.includes(me.email));
+  $("tabManage").classList.toggle("hide",!isAdmin());
   const first=playerId?"player":(coachId?"coach":"team");
   activate(first);
 
@@ -512,14 +520,17 @@ function startApp(){
     }));
   }
   unsub.push(onSnapshot(collection(db,"community"),s=>{teamMap={};s.forEach(d=>teamMap[d.id]=d.data());renderTeamNeeds();renderTeamOverview();renderContrib();}));
-  unsub.push(onSnapshot(collection(db,"players"),s=>{const r=[];s.forEach(d=>r.push({id:d.id,...d.data()}));renderPlayerDash(r)}));
-  unsub.push(onSnapshot(collection(db,"coaches"),s=>{const r=[];s.forEach(d=>r.push({id:d.id,...d.data()}));renderCoachDash(r)}));
+  if(isAdmin()){
+    unsub.push(onSnapshot(collection(db,"players"),s=>{const r=[];s.forEach(d=>r.push({id:d.id,...d.data()}));renderPlayerDash(r)}));
+    unsub.push(onSnapshot(collection(db,"coaches"),s=>{const r=[];s.forEach(d=>r.push({id:d.id,...d.data()}));renderCoachDash(r)}));
+  }
   unsub.push(onSnapshot(doc(db,"config","lists"),snap=>{MASTER=snap.exists()?snap.data():null;rerenderAll();}));
   unsub.push(onSnapshot(doc(db,"config","team"),snap=>{MASTERTEAM=snap.exists()?snap.data():null;renderTeamNeeds();renderTeamOverview();
     if(!$("panel-manage").classList.contains("hide")&&manageList==="team")renderManage();}));
 }
 
 function activate(tab){
+  if(tab==="manage"&&!isAdmin()) tab=playerId?"player":(coachId?"coach":"team");
   document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
   $("tab"+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add("active");
   ["player","coach","team","manage"].forEach(p=>$("panel-"+p).classList.add("hide"));
@@ -586,7 +597,8 @@ function openPrintView(){
   f.onload=()=>{setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print();}catch(e){window.print();}},450);};
 }
 
-const escAttr=s=>s.replace(/"/g,"&quot;");
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const escAttr=s=>esc(String(s));
 function curRec(list){return list==="player"?recPlayer:recCoach}
 function curRef(list){return list==="player"?doc(db,"players",playerId):doc(db,"coaches",coachId)}
 
@@ -730,59 +742,201 @@ $("mgTeam").onclick=()=>{manageList="team";setMg("mgTeam");renderManage();};
 function setMg(on){["mgPlayer","mgCoach","mgTeam"].forEach(i=>$(i).classList.toggle("on",i===on));}
 
 function renderManage(){
+  if(!isAdmin()){
+    $("manageBody").innerHTML='<div class="card"><div class="empty">Manage access is limited to approved admin emails.</div></div>';
+    return;
+  }
   if(manageList==="team"){renderManageTeam();return;}
   const data=L(manageList);
   let html="";
   for(const[sec,items]of Object.entries(data)){
-    html+=`<div class="card"><div class="dash-h">${sec}</div>`;
-    items.forEach(it=>{
-      html+=`<div class="mgrow"><span>${it}</span><button class="rm" data-rmstd="${escAttr(it)}" data-sec="${escAttr(sec)}" title="Remove from team list">×</button></div>`;
+    html+=`<div class="card"><div class="dash-h">${esc(sec)}</div>`;
+    items.forEach((it,idx)=>{
+      html+=`<div class="mgrow"><span class="mgtext" data-editstd="1" data-list="${manageList}" data-sec="${escAttr(sec)}" data-idx="${idx}" title="Double-click or tap to edit">${esc(it)}</span><button class="rm" data-rmstd="${idx}" data-sec="${escAttr(sec)}" title="Remove from team list">×</button></div>`;
     });
-    html+=`<div class="addmini"><input class="mgAdd" data-sec="${escAttr(sec)}" placeholder="Add to ${sec}…" maxlength="40"><button class="mgAddBtn" data-sec="${escAttr(sec)}" title="Add to team list">+</button></div></div>`;
+    html+=`<div class="addmini"><input class="mgAdd" data-sec="${escAttr(sec)}" placeholder="Add to ${escAttr(sec)}…" maxlength="40"><button class="mgAddBtn" data-sec="${escAttr(sec)}" title="Add to team list">+</button></div></div>`;
   }
   $("manageBody").innerHTML=html;
   $("manageBody").querySelectorAll("[data-rmstd]").forEach(b=>b.onclick=()=>{
+    if(!isAdmin())return alert("Manage access is limited to approved admin emails.");
     if(!confirm("Remove this from the standard list for the whole team?"))return;
-    updateStd(manageList,b.dataset.sec,arr=>arr.filter(x=>x!==b.dataset.rmstd));});
+    const idx=parseInt(b.dataset.rmstd,10);
+    updateStd(manageList,b.dataset.sec,arr=>arr.filter((_,i)=>i!==idx));});
   $("manageBody").querySelectorAll(".mgAddBtn").forEach(b=>b.onclick=()=>{
+    if(!isAdmin())return alert("Manage access is limited to approved admin emails.");
     const inp=b.previousElementSibling,v=inp.value.trim();if(!v)return;
     updateStd(manageList,b.dataset.sec,arr=>arr.includes(v)?arr:[...arr,v]);});
   $("manageBody").querySelectorAll(".mgAdd").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")i.nextElementSibling.click();}));
+  attachInlineManageEditors();
 }
 function updateStd(list,sec,fn){
+  if(!isAdmin())return alert("Manage access is limited to approved admin emails.");
   const cur=L(list),clone={};
   for(const k in cur)clone[k]=cur[k].slice();
   clone[sec]=fn(clone[sec]||[]);
-  setDoc(doc(db,"config","lists"),{[list]:clone},{merge:true});
+  return setDoc(doc(db,"config","lists"),{[list]:clone},{merge:true});
+}
+
+function attachInlineManageEditors(){
+  $("manageBody").querySelectorAll("[data-editstd]").forEach(el=>{
+    el.onclick=()=>startInlineEdit(el,async(newValue,oldValue)=>{
+      await editStdItem(el.dataset.list,el.dataset.sec,parseInt(el.dataset.idx,10),oldValue,newValue);
+    });
+  });
+  $("manageBody").querySelectorAll("[data-editteam]").forEach(el=>{
+    el.onclick=()=>startInlineEdit(el,async(newValue)=>{
+      await editTeamItem(el.dataset.editteam,newValue);
+    });
+  });
+}
+function startInlineEdit(el,saveFn){
+  if(!isAdmin())return alert("Manage access is limited to approved admin emails.");
+  if(el.classList.contains("editing"))return;
+  const oldValue=el.textContent.trim();
+  const input=document.createElement("input");
+  input.className="mgEditIn";
+  input.value=oldValue;
+  input.maxLength=60;
+  el.classList.add("editing");
+  el.textContent="";
+  el.appendChild(input);
+  input.focus();
+  input.select();
+  let finished=false;
+  const finish=async(save)=>{
+    if(finished)return;
+    finished=true;
+    const newValue=input.value.trim();
+    if(!save||!newValue||newValue===oldValue){
+      el.classList.remove("editing");
+      el.textContent=oldValue;
+      return;
+    }
+    el.classList.remove("editing");
+    el.textContent=newValue;
+    try{await saveFn(newValue,oldValue);}
+    catch(e){
+      console.error(e);
+      alert("Could not save that edit: "+(e.message||e));
+      el.textContent=oldValue;
+    }
+  };
+  input.addEventListener("keydown",e=>{
+    if(e.key==="Enter"){e.preventDefault();finish(true);}
+    if(e.key==="Escape"){e.preventDefault();finish(false);}
+  });
+  input.addEventListener("blur",()=>finish(true));
+}
+async function editStdItem(list,sec,idx,oldValue,newValue){
+  if(!isAdmin())throw new Error("Admin only");
+  const cur=L(list),arr=(cur[sec]||[]).slice();
+  if(!arr[idx])return;
+  if(arr.some((x,i)=>i!==idx&&x.trim().toLowerCase()===newValue.toLowerCase())){
+    alert("That item already exists in this section.");
+    renderManage();
+    return;
+  }
+  const oldText=arr[idx];
+  arr[idx]=newValue;
+  await updateStd(list,sec,()=>arr);
+  await migrateListItemIds(list,oldText,newValue);
+}
+async function migrateListItemIds(list,oldText,newText){
+  const oldId=`${list}__${slug(oldText)}`,newId=`${list}__${slug(newText)}`;
+  if(oldId===newId)return;
+  const colName=list==="player"?"players":"coaches";
+  const snap=await getDocs(collection(db,colName));
+  const batch=writeBatch(db);
+  let changed=0;
+  snap.forEach(d=>{
+    const data=d.data();
+    const patch={updatedAt:serverTimestamp()};
+    let needs=false;
+    if(data.checked&&Object.prototype.hasOwnProperty.call(data.checked,oldId)){
+      patch[`checked.${newId}`]=data.checked[oldId];
+      patch[`checked.${oldId}`]=deleteField();
+      needs=true;
+    }
+    if(data.deleted&&Object.prototype.hasOwnProperty.call(data.deleted,oldId)){
+      patch[`deleted.${newId}`]=data.deleted[oldId];
+      patch[`deleted.${oldId}`]=deleteField();
+      needs=true;
+    }
+    if(needs){batch.update(d.ref,patch);changed++;}
+  });
+  if(changed)await batch.commit();
 }
 
 function renderManageTeam(){
+  if(!isAdmin()){
+    $("manageBody").innerHTML='<div class="card"><div class="empty">Manage access is limited to approved admin emails.</div></div>';
+    return;
+  }
   const items=teamItems();
   let rows="";
   items.forEach(it=>{
-    rows+=`<div class="mgrow"><span>${it.label}</span>
-      <label style="font-size:12px;color:var(--muted)">need
-      <input class="tgtIn" data-id="${it.id}" type="number" min="0" value="${it.target}" style="width:54px;margin:0 6px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;font-family:inherit"></label>
-      <button class="rm" data-rmt="${it.id}" title="Remove team item">×</button></div>`;
+    rows+=`<div class="mgrow"><span class="mgtext" data-editteam="${escAttr(it.id)}" title="Double-click or tap to edit">${esc(it.label)}</span>
+      <label style="font-size:12px;color:var(--muted);white-space:nowrap">need
+      <input class="tgtIn" data-id="${escAttr(it.id)}" type="number" min="0" value="${it.target}" style="width:54px;margin:0 6px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;font-family:inherit"></label>
+      <button class="rm" data-rmt="${escAttr(it.id)}" title="Remove team item">×</button></div>`;
   });
   $("manageBody").innerHTML=`<div class="card"><div class="dash-h">Team Needs</div>
-    <div class="note" style="margin-top:0">Set how many of each the team needs, add or remove items. Families contribute on the Player page.</div>
+    <div class="note" style="margin-top:0">Set how many of each the team needs, add, remove, or tap an item name to edit it. Families contribute on the Player page.</div>
     ${rows}
     <div class="addmini"><input id="tnAddLabel" placeholder="New team item…" maxlength="40"><input id="tnAddQty" type="number" min="1" value="1" style="width:54px;border:1px dashed #c3cad2;border-radius:7px;padding:6px"><button id="tnAddBtn">+</button></div>
     </div>`;
   $("manageBody").querySelectorAll(".tgtIn").forEach(i=>i.addEventListener("change",()=>{
+    if(!isAdmin())return alert("Manage access is limited to approved admin emails.");
     setTeam(items.map(x=>x.id===i.dataset.id?{label:x.label,target:Math.max(0,parseInt(i.value)||0)}:{label:x.label,target:x.target}));}));
   $("manageBody").querySelectorAll("[data-rmt]").forEach(b=>b.onclick=()=>{
+    if(!isAdmin())return alert("Manage access is limited to approved admin emails.");
     if(!confirm("Remove this team item for everyone?"))return;
     setTeam(items.filter(x=>x.id!==b.dataset.rmt).map(x=>({label:x.label,target:x.target})));});
-  const add=()=>{const l=$("tnAddLabel").value.trim();if(!l)return;
-    if(items.some(x=>x.id===slug(l)))return;
+  const add=()=>{if(!isAdmin())return alert("Manage access is limited to approved admin emails.");
+    const l=$("tnAddLabel").value.trim();if(!l)return;
+    if(items.some(x=>x.id===slug(l)))return alert("That team item already exists.");
     const q=Math.max(0,parseInt($("tnAddQty").value)||1);
     setTeam([...items.map(x=>({label:x.label,target:x.target})),{label:l,target:q}]);};
   $("tnAddBtn").onclick=add;
   $("tnAddLabel").addEventListener("keydown",e=>{if(e.key==="Enter")add();});
+  attachInlineManageEditors();
 }
-function setTeam(arr){setDoc(doc(db,"config","team"),{items:arr},{merge:true});}
+async function editTeamItem(oldId,newLabel){
+  if(!isAdmin())throw new Error("Admin only");
+  const items=teamItems();
+  const oldItem=items.find(x=>x.id===oldId);
+  if(!oldItem)return;
+  const newId=slug(newLabel);
+  if(!newId)return;
+  if(items.some(x=>x.id!==oldId&&x.id===newId)){
+    alert("That team item already exists.");
+    renderManage();
+    return;
+  }
+  await setTeam(items.map(x=>x.id===oldId?{label:newLabel,target:x.target}:{label:x.label,target:x.target}));
+  await migrateTeamItemId(oldId,newId);
+}
+async function migrateTeamItemId(oldId,newId){
+  if(oldId===newId)return;
+  const oldRef=doc(db,"community",oldId),newRef=doc(db,"community",newId);
+  const oldSnap=await getDoc(oldRef);
+  if(!oldSnap.exists())return;
+  const oldData=oldSnap.data()||{};
+  const newSnap=await getDoc(newRef);
+  if(newSnap.exists()){
+    const nd=newSnap.data()||{};
+    const contrib={...(nd.contrib||{})};
+    Object.entries(oldData.contrib||{}).forEach(([k,v])=>{contrib[k]=(contrib[k]||0)+(v||0);});
+    await setDoc(newRef,{...nd,...oldData,contrib},{merge:true});
+  }else{
+    await setDoc(newRef,oldData,{merge:true});
+  }
+  await deleteDoc(oldRef);
+}
+function setTeam(arr){
+  if(!isAdmin())return alert("Manage access is limited to approved admin emails.");
+  return setDoc(doc(db,"config","team"),{items:arr},{merge:true});
+}
 </script>
 </body>
 </html>
