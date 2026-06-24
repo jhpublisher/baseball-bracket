@@ -73,6 +73,11 @@
   .rm{margin-left:auto;border:none;background:none;color:#c3cad2;cursor:pointer;font-size:15px;line-height:1;padding:0 4px}
   .rm:hover{color:var(--red)}
   .rm.trash{font-size:12px;color:#b8a68f}.rm.trash:hover{color:var(--red)}
+  .switch{display:flex;gap:8px}
+  .switch button{flex:1;padding:9px;border:1px solid var(--line);background:#fff;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;color:var(--muted)}
+  .switch button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .mgrow{display:flex;align-items:center;gap:8px;padding:7px 4px;font-size:14px;border-bottom:1px solid var(--line)}
+  .mgrow .rm{margin-left:auto}
   .addmini{display:flex;gap:6px;margin-top:6px;padding:0 4px}
   .addmini input{flex:1;padding:6px 8px;border:1px dashed #c3cad2;border-radius:7px;font-size:13px;font-family:inherit}
   .addmini button{background:var(--red);color:#fff;border:none;border-radius:7px;width:30px;font-size:18px;line-height:1;cursor:pointer}
@@ -212,6 +217,7 @@
       <button class="tab" data-tab="player" id="tabPlayer">Player</button>
       <button class="tab" data-tab="coach" id="tabCoach">Coach</button>
       <button class="tab" data-tab="team" id="tabTeam">Team</button>
+      <button class="tab hide" data-tab="manage" id="tabManage">Manage</button>
     </nav>
   </header>
   <div class="wrap">
@@ -250,6 +256,18 @@
       </div>
       <div class="card"><div class="dash-h">Player packing progress</div><div id="dashPlayers"><div class="empty">Loading…</div></div></div>
       <div class="card"><div class="dash-h">Coach packing progress</div><div id="dashCoaches"><div class="empty">Loading…</div></div></div>
+    </section>
+
+    <section class="panel hide" id="panel-manage">
+      <div class="card">
+        <div class="dash-h">Manage standard list</div>
+        <div class="note" style="margin-top:0">Coaches only. Add or remove items from the master list <b>everyone</b> sees. Families' personal check-offs and their own added items aren't affected.</div>
+        <div class="switch" style="margin-top:12px">
+          <button id="mgPlayer" class="on">Player list</button>
+          <button id="mgCoach">Coach list</button>
+        </div>
+      </div>
+      <div id="manageBody"></div>
     </section>
   </div>
 </div>
@@ -308,12 +326,14 @@ const COMMUNITY=["Box Fans","Bug Spray","Card Games","Doormat / Boot Tray","Exte
   "Sunscreen","Team Cooler","Wagon","Wiffle Ball Set","Wiffle Balls"];
 
 const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-const totalFor=l=>Object.values(PACKING[l]).reduce((n,a)=>n+a.length,0);
+let MASTER=null;
+const L=l=>(MASTER&&MASTER[l])?MASTER[l]:PACKING[l];
+const totalFor=l=>Object.values(L(l)).reduce((n,a)=>n+a.length,0);
 const $=id=>document.getElementById(id);
 const LS=window.localStorage;
 
 let me=null, playerId=null, coachId=null, recPlayer=null, recCoach=null, unsub=[], isCoachUser=false;
-let selPlayer=null, selCoach=null;
+let selPlayer=null, selCoach=null, manageList="player";
 const clearSubs=()=>{unsub.forEach(f=>f());unsub=[]};
 
 /* login */
@@ -399,6 +419,7 @@ function startApp(){
   // tab visibility
   $("tabPlayer").classList.toggle("hide",!playerId);
   $("tabCoach").classList.toggle("hide",!coachId);
+  $("tabManage").classList.toggle("hide",!isCoachUser);
   const first=playerId?"player":(coachId?"coach":"team");
   activate(first);
 
@@ -427,14 +448,15 @@ function startApp(){
   unsub.push(onSnapshot(collection(db,"community"),s=>{const m={};s.forEach(d=>m[d.id]=d.data());renderCommunity(m)}));
   unsub.push(onSnapshot(collection(db,"players"),s=>{const r=[];s.forEach(d=>r.push({id:d.id,...d.data()}));renderPlayerDash(r)}));
   unsub.push(onSnapshot(collection(db,"coaches"),s=>{const r=[];s.forEach(d=>r.push({id:d.id,...d.data()}));renderCoachDash(r)}));
+  unsub.push(onSnapshot(doc(db,"config","lists"),snap=>{MASTER=snap.exists()?snap.data():null;rerenderAll();}));
 }
 
 function activate(tab){
   document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
   $("tab"+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add("active");
-  ["player","coach","team"].forEach(p=>$("panel-"+p).classList.add("hide"));
+  ["player","coach","team","manage"].forEach(p=>$("panel-"+p).classList.add("hide"));
   $("panel-"+tab).classList.remove("hide");
-  $("floatPrint").style.display = (tab==="team") ? "none" : "flex";
+  $("floatPrint").style.display = (tab==="player"||tab==="coach") ? "flex" : "none";
 }
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>activate(t.dataset.tab));
 
@@ -451,7 +473,7 @@ function renderList(list,rec,bodyId,pctId,barId,ref){
       <input type="checkbox" data-id="${id}" ${checked[id]&&!struck?'checked':''} ${struck?'disabled':''}>
       <span class="${flag?'flag':''}">${flag?'★ ':''}${label}</span>
       <button class="rm" data-del="${id}" title="${struck?'Restore':'Remove'}">×</button></label>`;
-  for(const[sec,items]of Object.entries(PACKING[list])){
+  for(const[sec,items]of Object.entries(L(list))){
     html+=`<div class="seccard" data-sec="${escAttr(sec)}"><div class="sec-h">${sec}</div>`;
     let active="",struck="";
     for(const it of items){
@@ -534,6 +556,41 @@ function renderCoachDash(rows){
     const pct=Math.round(done/totalFor("coach")*100)||0;
     ch+=`<tr><td>${n}</td><td><span class="mini"><i style="width:${pct}%"></i></span> ${pct}%</td></tr>`;});
   $("dashCoaches").innerHTML=ch+'</tbody></table>';
+}
+
+function rerenderAll(){
+  if(playerId&&recPlayer)renderList("player",recPlayer,"playerBody","ppct","pbar",doc(db,"players",playerId));
+  if(coachId&&recCoach)renderList("coach",recCoach,"coachBody","cpct","cbar",doc(db,"coaches",coachId));
+  if(!$("panel-manage").classList.contains("hide"))renderManage();
+}
+
+$("mgPlayer").onclick=()=>{manageList="player";$("mgPlayer").classList.add("on");$("mgCoach").classList.remove("on");renderManage();};
+$("mgCoach").onclick=()=>{manageList="coach";$("mgCoach").classList.add("on");$("mgPlayer").classList.remove("on");renderManage();};
+
+function renderManage(){
+  const data=L(manageList);
+  let html="";
+  for(const[sec,items]of Object.entries(data)){
+    html+=`<div class="card"><div class="dash-h">${sec}</div>`;
+    items.forEach(it=>{
+      html+=`<div class="mgrow"><span>${it}</span><button class="rm" data-rmstd="${escAttr(it)}" data-sec="${escAttr(sec)}" title="Remove from team list">×</button></div>`;
+    });
+    html+=`<div class="addmini"><input class="mgAdd" data-sec="${escAttr(sec)}" placeholder="Add to ${sec}…" maxlength="40"><button class="mgAddBtn" data-sec="${escAttr(sec)}" title="Add to team list">+</button></div></div>`;
+  }
+  $("manageBody").innerHTML=html;
+  $("manageBody").querySelectorAll("[data-rmstd]").forEach(b=>b.onclick=()=>{
+    if(!confirm("Remove this from the standard list for the whole team?"))return;
+    updateStd(manageList,b.dataset.sec,arr=>arr.filter(x=>x!==b.dataset.rmstd));});
+  $("manageBody").querySelectorAll(".mgAddBtn").forEach(b=>b.onclick=()=>{
+    const inp=b.previousElementSibling,v=inp.value.trim();if(!v)return;
+    updateStd(manageList,b.dataset.sec,arr=>arr.includes(v)?arr:[...arr,v]);});
+  $("manageBody").querySelectorAll(".mgAdd").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")i.nextElementSibling.click();}));
+}
+function updateStd(list,sec,fn){
+  const cur=L(list),clone={};
+  for(const k in cur)clone[k]=cur[k].slice();
+  clone[sec]=fn(clone[sec]||[]);
+  setDoc(doc(db,"config","lists"),{[list]:clone},{merge:true});
 }
 </script>
 </body>
