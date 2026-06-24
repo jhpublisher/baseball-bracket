@@ -143,28 +143,7 @@
   .empty{color:var(--muted);font-size:14px;text-align:center;padding:18px}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
   #printSheet{display:none}
-  @media print{
-    @page{size:portrait;margin:9mm}
-    body{background:#fff}
-    #login,#gate,#picker,#app{display:none!important}
-    #printSheet{display:block!important;color:#111;font-family:'Inter',sans-serif}
-    .ps-head{display:flex;align-items:center;gap:14px;border-bottom:3px solid #111;padding-bottom:8px;margin-bottom:10px}
-    .ps-logo{width:60px;height:60px;flex:0 0 auto}
-    .ps-name{font-family:'Anton',sans-serif;font-size:30px;text-transform:uppercase;line-height:1}
-    .ps-sub{font-size:12px;color:#555;margin-top:3px;letter-spacing:.3px}
-    .ps-cols{column-count:3;column-gap:18px}
-    .ps-h{background:#111;color:#fff;font-family:'Anton',sans-serif;font-size:11px;letter-spacing:.6px;
-      text-transform:uppercase;padding:3px 7px;margin:8px 0 4px;break-after:avoid;
-      -webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .ps-h.first{margin-top:0}
-    .ps-row{display:flex;gap:7px;align-items:flex-start;font-size:11px;line-height:1.3;padding:1.5px 2px;break-inside:avoid}
-    .ps-box{width:11px;height:11px;border:1.4px solid #333;border-radius:2px;flex:0 0 auto;margin-top:1.5px;position:relative;
-      -webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .ps-box.on{background:#111}
-    .ps-box.on::after{content:"";position:absolute;left:3px;top:0;width:3.5px;height:7px;border:solid #fff;border-width:0 1.6px 1.6px 0;transform:rotate(45deg)}
-    .ps-flag{font-weight:700}
-    .ps-combo{font-size:9.5px;color:#555;margin:0 0 2px 18px}
-  }
+  @media print{.float-print{display:none!important}}
 </style>
 </head>
 <body>
@@ -292,8 +271,6 @@
     </section>
   </div>
 </div>
-
-<div id="printSheet"></div>
 
 <script type="module">
 /* ============================================================ */
@@ -500,35 +477,55 @@ function activate(tab){
 }
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>activate(t.dataset.tab));
 
-$("floatPrint").onclick=()=>{buildPrintSheet();setTimeout(()=>window.print(),40);};
+$("floatPrint").onclick=openPrintView;
 
+const PRINT_CSS=`
+*{box-sizing:border-box;margin:0;padding:0}
+@page{size:portrait;margin:9mm}
+body{font-family:'Inter',Arial,sans-serif;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ps-head{display:flex;align-items:center;gap:14px;border-bottom:3px solid #111;padding-bottom:8px;margin-bottom:10px}
+.ps-logo{width:62px;height:62px;flex:0 0 auto}
+.ps-name{font-family:'Anton',Arial,sans-serif;font-size:30px;text-transform:uppercase;line-height:1;font-weight:400}
+.ps-sub{font-size:12px;color:#555;margin-top:3px;letter-spacing:.3px}
+.ps-cols{column-count:3;column-gap:18px}
+.ps-h{background:#111;color:#fff;font-family:'Anton',Arial,sans-serif;font-weight:400;font-size:11px;letter-spacing:.6px;text-transform:uppercase;padding:3px 7px;margin:9px 0 4px;break-after:avoid}
+.ps-h.first{margin-top:0}
+.ps-row{display:flex;gap:7px;align-items:flex-start;font-size:11px;line-height:1.3;padding:1.6px 2px;break-inside:avoid}
+.ps-box{width:11px;height:11px;border:1.4px solid #333;border-radius:2px;flex:0 0 auto;margin-top:1.5px;position:relative}
+.ps-box.on{background:#111}
+.ps-box.on::after{content:"";position:absolute;left:3px;top:0;width:3.5px;height:7px;border:solid #fff;border-width:0 1.6px 1.6px 0;transform:rotate(45deg)}
+.ps-flag{font-weight:700}
+.ps-combo{font-size:9.5px;color:#555;margin:1px 0 2px 18px}
+`;
 function psRow(id,label,flag,on){
   return `<div class="ps-row"><span class="ps-box ${on?'on':''}"></span><span class="${flag?'ps-flag':''}">${flag?'★ ':''}${label}</span></div>`;
 }
-function buildPrintSheet(){
+function openPrintView(){
   const list = !$("panel-coach").classList.contains("hide") ? "coach" : "player";
-  const rec = list==="coach"?recCoach:recPlayer; if(!rec)return;
-  const name = list==="coach"?(COACHES.find(n=>slug(n)===coachId)||""):(ROSTER.find(n=>slug(n)===playerId)||"");
-  const checked=rec.checked||{}, deleted=rec.deleted||{}, custom=rec.custom||{};
+  const rec = list==="coach"?recCoach:recPlayer;
+  if(!rec){alert("Open your Player or Coach tab first, then tap Print.");return;}
+  const name=list==="coach"?(COACHES.find(n=>slug(n)===coachId)||""):(ROSTER.find(n=>slug(n)===playerId)||"");
+  const checked=rec.checked||{},deleted=rec.deleted||{},custom=rec.custom||{};
   let cols="",first=true;
   for(const[sec,items]of Object.entries(L(list))){
     cols+=`<div class="ps-h ${first?'first':''}">${sec}</div>`;first=false;
-    items.forEach(it=>{
-      const id=`${list}__${slug(it)}`; if(deleted[id])return;
+    items.forEach(it=>{const id=`${list}__${slug(it)}`;if(deleted[id])return;
       const flag=it.startsWith("★"),label=flag?it.slice(1).trim():it;
       cols+=psRow(id,label,flag,!!checked[id]);
-      if(list==="player"&&it.startsWith("Padlock")&&rec.padlockCombo){
-        cols+=`<div class="ps-combo">Combo: ${rec.padlockCombo}</div>`;
-      }
-    });
-    (custom[sec]||[]).forEach(c=>{const id="cust__"+c.id;cols+=psRow(id,c.label,false,!!checked[id]);});
+      if(list==="player"&&it.startsWith("Padlock")&&rec.padlockCombo)cols+=`<div class="ps-combo">Combo: ${rec.padlockCombo}</div>`;});
+    (custom[sec]||[]).forEach(c=>{cols+=psRow("cust__"+c.id,c.label,false,!!checked["cust__"+c.id]);});
   }
-  $("printSheet").innerHTML=`
-    <div class="ps-head">
-      <img class="ps-logo" src="${LOGO}" alt="">
-      <div><div class="ps-name">${name}</div><div class="ps-sub">Cooperstown 2025 Packing List</div></div>
-    </div>
-    <div class="ps-cols">${cols}</div>`;
+  const body=`<div class="ps-head"><img class="ps-logo" src="${LOGO}"><div><div class="ps-name">${name}</div><div class="ps-sub">Cooperstown 2025 Packing List</div></div></div><div class="ps-cols">${cols}</div>`;
+  const docHtml='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+name+' Packing List</title>'
+    +'<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    +'<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">'
+    +'<style>'+PRINT_CSS+'</style></head><body>'+body+'</body></html>';
+  let f=document.getElementById("printFrame"); if(f)f.remove();
+  f=document.createElement("iframe"); f.id="printFrame";
+  f.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden";
+  document.body.appendChild(f);
+  const d=f.contentWindow.document; d.open(); d.write(docHtml); d.close();
+  f.onload=()=>{setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print();}catch(e){window.print();}},450);};
 }
 
 const escAttr=s=>s.replace(/"/g,"&quot;");
