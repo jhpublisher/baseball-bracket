@@ -78,23 +78,20 @@
   .switch button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
   .mgrow{display:flex;align-items:center;gap:8px;padding:7px 4px;font-size:14px;border-bottom:1px solid var(--line)}
   .mgrow .rm{margin-left:auto}
-  .seccard.teamcard{background:var(--navy);border-color:var(--navy)}
-  .teamcard .tn-head{color:var(--red)}
-  .teamcard .tn-head::before{background:var(--red)}
-  .tn-note{color:#cbb9a6;font-size:12px;margin:0 0 10px;line-height:1.4}
-  .tn{padding:8px 0;border-top:1px solid #2c2420}
+  .tn-note{color:var(--muted);font-size:12px;margin:0 0 10px;line-height:1.4}
+  .tn{padding:8px 0;border-top:1px solid var(--line)}
   .tn:first-of-type{border-top:none}
   .tn-top{display:flex;align-items:center;gap:8px}
-  .tn-name{color:#fff;font-size:14px;font-weight:600}
-  .tn-count{margin-left:auto;font-size:12px;color:#e9c49b;font-weight:700;white-space:nowrap}
-  .tn-count.filled{color:#7ddca0}
-  .tn-bar{height:7px;background:#2c2420;border-radius:99px;overflow:hidden;margin:6px 0}
+  .tn-name{color:var(--ink);font-size:14px;font-weight:600}
+  .tn-count{margin-left:auto;font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap}
+  .tn-count.filled{color:var(--good)}
+  .tn-bar{height:7px;background:#eee6d6;border-radius:99px;overflow:hidden;margin:6px 0}
   .tn-bar>i{display:block;height:100%;background:var(--red)}
   .tn-step{display:flex;align-items:center;gap:10px}
-  .tn-mine{color:#cbb9a6;font-size:12px}
+  .tn-mine{color:var(--muted);font-size:12px}
   .stp{width:30px;height:30px;border:none;border-radius:7px;background:var(--red);color:#fff;font-size:18px;line-height:1;cursor:pointer;font-weight:700}
   .stp:hover{background:var(--red-d)}
-  .stp:disabled{background:#4a3f36;cursor:not-allowed}
+  .stp:disabled{background:#d8cdbf;cursor:not-allowed}
   @media print{.seccard.teamcard{display:none!important}}
   .addmini{display:flex;gap:6px;margin-top:6px;padding:0 4px}
   .addmini input{flex:1;padding:6px 8px;border:1px dashed #c3cad2;border-radius:7px;font-size:13px;font-family:inherit}
