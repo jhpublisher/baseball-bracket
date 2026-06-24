@@ -400,53 +400,72 @@ $("codeBtn").onclick=()=>{
 
 /* picker */
 function buildPickers(){
-  selPlayer=null;selCoach=null;
+  selPlayer=playerId||null;
+  selCoach=coachId||null;
+
+  $("pickHelp").textContent="Choose your player and/or a coach. Pick a coach to view and edit that coach's checklist.";
+
   $("playerGrid").innerHTML="";
   ROSTER.forEach(n=>{const b=document.createElement("button");b.className="rbtn";b.textContent=n;
     b.onclick=()=>{selPlayer=(selPlayer===slug(n))?null:slug(n);paint();};$("playerGrid").appendChild(b);});
-  if(isCoachUser){
-    $("coachWrap").classList.remove("hide");
-    $("pickHelp").textContent="Pick a player, a coach, or both. Coaches can switch anytime.";
-    $("coachGrid").innerHTML="";
-    COACHES.forEach(n=>{const b=document.createElement("button");b.className="rbtn";b.textContent=n;
-      b.onclick=()=>{selCoach=(selCoach===slug(n))?null:slug(n);paint();};$("coachGrid").appendChild(b);});
-  }else{$("coachWrap").classList.add("hide");}
+
+  $("coachWrap").classList.remove("hide");
+  $("coachGrid").innerHTML="";
+  COACHES.forEach(n=>{const b=document.createElement("button");b.className="rbtn";b.textContent=n;
+    b.onclick=()=>{selCoach=(selCoach===slug(n))?null:slug(n);paint();};$("coachGrid").appendChild(b);});
+
   paint();
 }
 function paint(){
   [...$("playerGrid").children].forEach(b=>b.classList.toggle("sel",slug(b.textContent)===selPlayer));
-  if(isCoachUser)[...$("coachGrid").children].forEach(b=>b.classList.toggle("sel",slug(b.textContent)===selCoach));
+  [...$("coachGrid").children].forEach(b=>b.classList.toggle("sel",slug(b.textContent)===selCoach));
   $("pickBtn").disabled=!(selPlayer||selCoach);
+}
+function saveLocalSelection(p,c){
+  p?LS.setItem("coop_player",p):LS.removeItem("coop_player");
+  c?LS.setItem("coop_coach",c):LS.removeItem("coop_coach");
 }
 $("pickBtn").onclick=async()=>{
   if(!(selPlayer||selCoach)){$("pickErr").textContent="Pick at least one.";return;}
-  if(isCoachUser){
-    selPlayer?LS.setItem("coop_player",selPlayer):LS.removeItem("coop_player");
-    selCoach?LS.setItem("coop_coach",selCoach):LS.removeItem("coop_coach");
-  }else{
-    await setDoc(doc(db,"users",me.uid),{email:me.email,playerId:selPlayer},{merge:true});
-  }
+  saveLocalSelection(selPlayer,selCoach);
+  await setDoc(doc(db,"users",me.uid),{
+    email:me.email,
+    playerId:selPlayer||null,
+    coachId:selCoach||null,
+    updatedAt:serverTimestamp()
+  },{merge:true});
   route();
 };
-$("switchKid").onclick=()=>{LS.removeItem("coop_player");LS.removeItem("coop_coach");route();};
+$("switchKid").onclick=async()=>{
+  saveLocalSelection(null,null);
+  if(me){
+    try{await setDoc(doc(db,"users",me.uid),{playerId:null,coachId:null,updatedAt:serverTimestamp()},{merge:true});}
+    catch(e){console.warn("Could not clear saved selection",e);}
+  }
+  playerId=null;coachId=null;recPlayer=null;recCoach=null;
+  buildPickers();show("picker");
+};
 
 function show(id){["login","gate","picker","app"].forEach(s=>$(s).classList.toggle("hide",s!==id))}
 
 async function route(){
   if(!me){show("login");return}
   if(LS.getItem("coop_team")!=="1"){show("gate");return}
+
   isCoachUser=COACH_EMAILS.includes(me.email);
-  if(isCoachUser){
-    playerId=LS.getItem("coop_player")||null;
-    coachId=LS.getItem("coop_coach")||null;
-    if(!playerId&&!coachId){buildPickers();show("picker");return}
-    $("switchKid").classList.remove("hide");
+
+  const us=await getDoc(doc(db,"users",me.uid));
+  const saved=us.exists()?us.data():{};
+  playerId=LS.getItem("coop_player")||saved.playerId||null;
+  coachId=LS.getItem("coop_coach")||saved.coachId||null;
+
+  if(playerId||coachId){
+    saveLocalSelection(playerId,coachId);
   }else{
-    const us=await getDoc(doc(db,"users",me.uid));
-    playerId=us.exists()?us.data().playerId:null;coachId=null;
-    if(!playerId){buildPickers();show("picker");return}
-    $("switchKid").classList.add("hide");
+    buildPickers();show("picker");return;
   }
+
+  $("switchKid").classList.remove("hide");
   show("app");startApp();
 }
 
