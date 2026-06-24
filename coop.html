@@ -78,6 +78,24 @@
   .switch button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
   .mgrow{display:flex;align-items:center;gap:8px;padding:7px 4px;font-size:14px;border-bottom:1px solid var(--line)}
   .mgrow .rm{margin-left:auto}
+  .seccard.teamcard{background:var(--navy);border-color:var(--navy)}
+  .teamcard .tn-head{color:var(--red)}
+  .teamcard .tn-head::before{background:var(--red)}
+  .tn-note{color:#cbb9a6;font-size:12px;margin:0 0 10px;line-height:1.4}
+  .tn{padding:8px 0;border-top:1px solid #2c2420}
+  .tn:first-of-type{border-top:none}
+  .tn-top{display:flex;align-items:center;gap:8px}
+  .tn-name{color:#fff;font-size:14px;font-weight:600}
+  .tn-count{margin-left:auto;font-size:12px;color:#e9c49b;font-weight:700;white-space:nowrap}
+  .tn-count.filled{color:#7ddca0}
+  .tn-bar{height:7px;background:#2c2420;border-radius:99px;overflow:hidden;margin:6px 0}
+  .tn-bar>i{display:block;height:100%;background:var(--red)}
+  .tn-step{display:flex;align-items:center;gap:10px}
+  .tn-mine{color:#cbb9a6;font-size:12px}
+  .stp{width:30px;height:30px;border:none;border-radius:7px;background:var(--red);color:#fff;font-size:18px;line-height:1;cursor:pointer;font-weight:700}
+  .stp:hover{background:var(--red-d)}
+  .stp:disabled{background:#4a3f36;cursor:not-allowed}
+  @media print{.seccard.teamcard{display:none!important}}
   .addmini{display:flex;gap:6px;margin-top:6px;padding:0 4px}
   .addmini input{flex:1;padding:6px 8px;border:1px dashed #c3cad2;border-radius:7px;font-size:13px;font-family:inherit}
   .addmini button{background:var(--red);color:#fff;border:none;border-radius:7px;width:30px;font-size:18px;line-height:1;cursor:pointer}
@@ -250,9 +268,10 @@
 
     <section class="panel hide" id="panel-team">
       <div class="card">
-        <div class="dash-h">Share board</div>
-        <div class="note" style="margin-top:0">Claim what you'll bring so we don't double up. Live for everyone.</div>
-        <div id="commBody"></div>
+        <div class="dash-h">Team needs</div>
+        <div class="prog-row" style="display:flex;align-items:center;gap:10px;margin:2px 0 6px"><span class="lbl" style="font-family:'Anton',sans-serif;font-size:16px;color:var(--navy)">Overall</span><span class="pct" id="tpct" style="margin-left:auto;font-weight:700;color:var(--navy)">0%</span></div>
+        <div class="bar" style="margin-bottom:10px"><i id="tbar"></i></div>
+        <div id="teamOverview"><div class="empty">Loading…</div></div>
       </div>
       <div class="card"><div class="dash-h">Player packing progress</div><div id="dashPlayers"><div class="empty">Loading…</div></div></div>
       <div class="card"><div class="dash-h">Coach packing progress</div><div id="dashCoaches"><div class="empty">Loading…</div></div></div>
@@ -265,6 +284,7 @@
         <div class="switch" style="margin-top:12px">
           <button id="mgPlayer" class="on">Player list</button>
           <button id="mgCoach">Coach list</button>
+          <button id="mgTeam">Team needs</button>
         </div>
       </div>
       <div id="manageBody"></div>
@@ -296,7 +316,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
          createUserWithEmailAndPassword, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, runTransaction, serverTimestamp }
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, runTransaction, serverTimestamp, increment }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getFirestore(app);
@@ -309,25 +329,39 @@ const PACKING={
  player:{
   "Equipment":["Sliding Shorts (2)","Cup","Navy Belt","Red Belt","Sunglasses","Batting Gloves","Catcher's Gear (if applicable)","Equipment Bag","Cleats (NO metal cleats)","White Knicker Pants (2)","Bat","Helmet","Glove(s)"],
   "Clothing":["Underwear","Socks","T-shirts","Shorts","Pajamas","Flip Flops/Crocs (showering)","Hoodie or Jacket","Swim Trunks (showering)","Sweatpants"],
-  "Personal":["Toothbrush","Toothpaste","Deodorant","Body Wash","Shampoo","Comb/Brush","Lip Balm","Sunscreen","Medication","Bug Spray","Gold Bond Powder/Spray","Mesh Toiletry Bag"],
-  "Other / Misc":["Trading Pins","Pin Towel/Book/Case","Extension Cord","Wiffle Balls","Card Games","Box Fan","Personal/Clip-on Fan","Team Hat & Shirt","Phone Charger","Pillow w/ Pillowcase","Twin Sheet Set","Blanket or Sleeping Bag","2 Towels (microfiber)","2 Washcloths","Flashlight or Headlamp","List of Teams (pin trading)","Rain Poncho/Umbrella","Padlock (2)","Over-the-Door Hook","Fabric Labels / Sharpies","Concession Money","Confidence & Good Attitude","★ BIRTH CERTIFICATE"],
-  "Optional":["5-Gal Bucket w/ Lid","Extra Cleats (rain)","Extra Navy & Red Socks","Refillable Water Bottle","Extra Shoelaces","Shoe Dryer","Cooling Towel","Sleep Mask","Eye Black","Ear Plugs"]
+  "Personal":["Toothbrush","Toothpaste","Deodorant","Body Wash","Shampoo","Comb/Brush","Lip Balm","Sunscreen","Medication","Gold Bond Powder/Spray","Mesh Toiletry Bag"],
+  "Other / Misc":["Trading Pins","Pin Towel/Book/Case","Personal/Clip-on Fan","Team Hat & Shirt","Phone Charger","Pillow w/ Pillowcase","Twin Sheet Set","Blanket or Sleeping Bag","2 Towels","2 Washcloths","Flashlight or Headlamp","List of Teams (pin trading)","Rain Poncho/Umbrella","Padlock (2)","Over-the-Door Hook","Fabric Labels / Sharpies","Personal Snacks","Concession Money","Confidence & Good Attitude","★ BIRTH CERTIFICATE"],
+  "Optional":["Extra Cleats (rain)","Extra Navy & Red Socks","Refillable Water Bottle","Extra Shoelaces","Shoe Dryer","Cooling Towel","Sleep Mask","Eye Black","Ear Plugs","Card Games"]
  },
  coach:{
-  "Equipment":["Fungo","Sunglasses","First Aid Kit","Bucket of Balls","Glove"],
+  "Equipment":["Sunglasses","First Aid Kit","Bucket of Balls","Glove"],
   "Clothing":["Underwear","Pajamas","Sweatpants","Team Hat & Shirt","Flip Flops/Crocs (showering)","Hoodie or Jacket","Swim Trunks (showering)","T-shirts","Shorts","Socks","Shoes"],
-  "Personal":["Toothbrush","Toothpaste","Deodorant","Body Wash","Shampoo","Comb/Brush","Lip Balm","Sunscreen","Medication","Bug Spray","Gold Bond Powder/Spray","Mesh Toiletry Bag"],
-  "Other / Misc":["Padlock (2)","Padlock for Equipment Storage","Box Fan","Extension Cord","Power Strip","Phone Charger","Pillow w/ Pillowcase","Twin Sheet Set","Blanket or Sleeping Bag","Flashlight or Headlamp","Team Cooler","Wagon","Umbrella","Rain Poncho","Over-the-Door Hook","2 Towels (microfiber)","2 Washcloths","Personal/Clip-on Fan","Team Banner","Bungee Cords (banner)","Febreze/Air Freshener","DampRid","Black Sharpie","Silver Sharpie","Zip Ties","Painters Tape","Wiffle Ball Set","★ PAPERWORK"],
-  "Optional":["Chair (outside barracks)","Refillable Water Bottle","King Flat Sheet","Cooling Towel","Sleep Mask","Ear Plugs"]
+  "Personal":["Toothbrush","Toothpaste","Deodorant","Body Wash","Shampoo","Comb/Brush","Lip Balm","Sunscreen","Medication","Gold Bond Powder/Spray","Mesh Toiletry Bag"],
+  "Other / Misc":["Padlock (2)","Power Strip","Phone Charger","Pillow w/ Pillowcase","Twin Sheet Set","Blanket or Sleeping Bag","Flashlight or Headlamp","Umbrella","Rain Poncho","Over-the-Door Hook","2 Towels","2 Washcloths","Personal/Clip-on Fan","Team Banner","Bungee Cords (banner)","Black Sharpie","Silver Sharpie","Zip Ties","Painters Tape","★ PAPERWORK"],
+  "Optional":["Refillable Water Bottle","King Flat Sheet","Cooling Towel","Sleep Mask","Ear Plugs"]
  }
 };
-const COMMUNITY=["Box Fans","Bug Spray","Card Games","Doormat / Boot Tray","Extension Cords",
-  "Febreze / Air Freshener","Hand Sanitizer","Power Strips","Shoe Deodorizer","Snacks",
-  "Sunscreen","Team Cooler","Wagon","Wiffle Ball Set","Wiffle Balls"];
+const TEAMNEEDS_DEFAULT=[
+  {label:"Box Fan",target:3},
+  {label:"Extension Cord",target:3},
+  {label:"Team Cooler",target:1},
+  {label:"Wagon",target:2},
+  {label:"Febreze/Air Freshener",target:2},
+  {label:"Bug Spray",target:3},
+  {label:"Hand Sanitizer",target:3},
+  {label:"Shoe Deodorizer",target:2},
+  {label:"Doormat / Boot Tray",target:1},
+  {label:"Padlock for Equipment Storage",target:1},
+  {label:"Chair (outside barracks)",target:4},
+  {label:"Wiffle Ball Set",target:1}
+];
 
 const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 let MASTER=null;
+let MASTERTEAM=null, teamMap={};
 const L=l=>(MASTER&&MASTER[l])?MASTER[l]:PACKING[l];
+const teamItems=()=>((MASTERTEAM&&MASTERTEAM.items)?MASTERTEAM.items:TEAMNEEDS_DEFAULT)
+  .map(x=>({id:slug(x.label),label:x.label,target:Math.max(0,parseInt(x.target)||0)}));
 const totalFor=l=>Object.values(L(l)).reduce((n,a)=>n+a.length,0);
 const $=id=>document.getElementById(id);
 const LS=window.localStorage;
@@ -432,6 +466,7 @@ function startApp(){
       if(!snap.exists()){setDoc(ref,{name:pName,checked:{},custom:[],updatedAt:serverTimestamp()});return}
       recPlayer=snap.data();
       renderList("player",recPlayer,"playerBody","ppct","pbar",ref);
+      renderTeamNeeds();
     }));
   }
   if(coachId){
@@ -445,10 +480,12 @@ function startApp(){
       renderList("coach",recCoach,"coachBody","cpct","cbar",ref);
     }));
   }
-  unsub.push(onSnapshot(collection(db,"community"),s=>{const m={};s.forEach(d=>m[d.id]=d.data());renderCommunity(m)}));
+  unsub.push(onSnapshot(collection(db,"community"),s=>{teamMap={};s.forEach(d=>teamMap[d.id]=d.data());renderTeamNeeds();renderTeamOverview();}));
   unsub.push(onSnapshot(collection(db,"players"),s=>{const r=[];s.forEach(d=>r.push({id:d.id,...d.data()}));renderPlayerDash(r)}));
   unsub.push(onSnapshot(collection(db,"coaches"),s=>{const r=[];s.forEach(d=>r.push({id:d.id,...d.data()}));renderCoachDash(r)}));
   unsub.push(onSnapshot(doc(db,"config","lists"),snap=>{MASTER=snap.exists()?snap.data():null;rerenderAll();}));
+  unsub.push(onSnapshot(doc(db,"config","team"),snap=>{MASTERTEAM=snap.exists()?snap.data():null;renderTeamNeeds();renderTeamOverview();
+    if(!$("panel-manage").classList.contains("hide")&&manageList==="team")renderManage();}));
 }
 
 function activate(tab){
@@ -495,6 +532,7 @@ function renderList(list,rec,bodyId,pctId,barId,ref){
     const addrow=`<div class="addmini"><input class="addInp" data-sec="${escAttr(sec)}" placeholder="Add to ${sec}…" maxlength="40"><button class="addBtn" data-sec="${escAttr(sec)}" title="Add">+</button></div>`;
     html+=active+struck+addrow+`</div>`;
   }
+  if(list==="player") html+=`<div class="seccard teamcard" id="teamNeedsCard"></div>`;
   $(bodyId).innerHTML=html;
   const pct=total?Math.round(done/total*100):0;$(pctId).textContent=pct+"%";$(barId).style.width=pct+"%";
 
@@ -516,30 +554,49 @@ function renderList(list,rec,bodyId,pctId,barId,ref){
   if(cm)cm.addEventListener("blur",()=>setDoc(ref,{padlockCombo:cm.value.trim()},{merge:true}));
 }
 
-function renderCommunity(map){
-  const myName=coachId?(COACHES.find(n=>slug(n)===coachId)):(ROSTER.find(n=>slug(n)===playerId));
-  const myKey=coachId?("coach:"+coachId):("player:"+playerId);
-  let html="";
-  for(const label of COMMUNITY){
-    const id=slug(label),c=map[id],mine=c&&c.byKey===myKey,taken=c&&c.byKey;
-    html+=`<div class="ci ${mine?'mine':''}"><div><div class="nm">${label}</div>
-      ${taken?`<div class="by">${mine?'You — got it':'Bringing: '+(c.byName||'someone')}</div>`:''}</div>
-      ${mine?`<button class="btn btn-rel" data-rel="${id}">Release</button>`
-        :taken?`<span class="badge">Taken</span>`
-        :`<button class="btn btn-claim" data-claim="${id}" data-label="${label}">I'll bring it</button>`}</div>`;
-  }
-  $("commBody").innerHTML=html;
-  $("commBody").querySelectorAll("[data-claim]").forEach(b=>b.onclick=()=>claim(b.dataset.claim,b.dataset.label,myKey,myName));
-  $("commBody").querySelectorAll("[data-rel]").forEach(b=>b.onclick=()=>release(b.dataset.rel));
+function renderTeamNeeds(){
+  const card=$("teamNeedsCard"); if(!card) return;
+  const items=teamItems();
+  let rows="";
+  items.forEach(it=>{
+    const have=(teamMap[it.id]&&teamMap[it.id].count)||0;
+    const filled=it.target>0&&have>=it.target;
+    const pct=it.target>0?Math.min(100,Math.round(have/it.target*100)):(have>0?100:0);
+    rows+=`<div class="tn">
+      <div class="tn-top"><span class="tn-name">${it.label}</span>
+        <span class="tn-count ${filled?'filled':''}">${have} of ${it.target}${filled?' ✓':''}</span></div>
+      <div class="tn-bar"><i style="width:${pct}%"></i></div>
+      <div class="tn-step">
+        <button class="stp" data-dec="${it.id}" ${have<=0?'disabled':''}>−</button>
+        <span class="tn-mine">I'll bring</span>
+        <button class="stp" data-inc="${it.id}">+</button>
+      </div></div>`;
+  });
+  card.innerHTML=`<div class="sec-h tn-head">Team Needs</div>
+    <div class="tn-note">Shared barracks gear — tap + for each one you'll bring. No limit.</div>${rows}`;
+  card.querySelectorAll("[data-inc]").forEach(b=>b.onclick=()=>bump(b.dataset.inc,1));
+  card.querySelectorAll("[data-dec]").forEach(b=>b.onclick=()=>bump(b.dataset.dec,-1));
 }
-async function claim(id,label,myKey,myName){
-  const ref=doc(db,"community",id);
-  try{await runTransaction(db,async tx=>{const s=await tx.get(ref);
-    if(s.exists()&&s.data().byKey)throw new Error("Just claimed by someone else.");
-    tx.set(ref,{label,byKey:myKey,byName:myName,at:serverTimestamp()});});}
-  catch(e){alert(e.message)}
+async function bump(id,delta){
+  const cur=(teamMap[id]&&teamMap[id].count)||0;
+  if(delta<0&&cur<=0)return;
+  await setDoc(doc(db,"community",id),{count:increment(delta)},{merge:true});
 }
-async function release(id){await setDoc(doc(db,"community",id),{byKey:null,byName:null,at:serverTimestamp()},{merge:true})}
+function renderTeamOverview(){
+  const ov=$("teamOverview"); if(!ov) return;
+  const items=teamItems();
+  let have=0,need=0,html="";
+  items.forEach(it=>{
+    const h=(teamMap[it.id]&&teamMap[it.id].count)||0;
+    have+=Math.min(h,it.target); need+=it.target;
+    const filled=it.target>0&&h>=it.target;
+    const pct=it.target>0?Math.min(100,Math.round(h/it.target*100)):0;
+    html+=`<tr><td>${it.label}</td><td><span class="mini"><i style="width:${pct}%"></i></span> ${h}/${it.target}${filled?' ✓':''}</td></tr>`;
+  });
+  ov.innerHTML=`<table><tbody>${html}</tbody></table>`;
+  const opct=need>0?Math.round(have/need*100):0;
+  $("tpct").textContent=opct+"%"; $("tbar").style.width=opct+"%";
+}
 
 function renderPlayerDash(rows){
   const byId={};rows.forEach(r=>byId[r.id]=r);
@@ -559,15 +616,19 @@ function renderCoachDash(rows){
 }
 
 function rerenderAll(){
-  if(playerId&&recPlayer)renderList("player",recPlayer,"playerBody","ppct","pbar",doc(db,"players",playerId));
+  if(playerId&&recPlayer){renderList("player",recPlayer,"playerBody","ppct","pbar",doc(db,"players",playerId));renderTeamNeeds();}
   if(coachId&&recCoach)renderList("coach",recCoach,"coachBody","cpct","cbar",doc(db,"coaches",coachId));
+  renderTeamOverview();
   if(!$("panel-manage").classList.contains("hide"))renderManage();
 }
 
-$("mgPlayer").onclick=()=>{manageList="player";$("mgPlayer").classList.add("on");$("mgCoach").classList.remove("on");renderManage();};
-$("mgCoach").onclick=()=>{manageList="coach";$("mgCoach").classList.add("on");$("mgPlayer").classList.remove("on");renderManage();};
+$("mgPlayer").onclick=()=>{manageList="player";setMg("mgPlayer");renderManage();};
+$("mgCoach").onclick=()=>{manageList="coach";setMg("mgCoach");renderManage();};
+$("mgTeam").onclick=()=>{manageList="team";setMg("mgTeam");renderManage();};
+function setMg(on){["mgPlayer","mgCoach","mgTeam"].forEach(i=>$(i).classList.toggle("on",i===on));}
 
 function renderManage(){
+  if(manageList==="team"){renderManageTeam();return;}
   const data=L(manageList);
   let html="";
   for(const[sec,items]of Object.entries(data)){
@@ -592,6 +653,34 @@ function updateStd(list,sec,fn){
   clone[sec]=fn(clone[sec]||[]);
   setDoc(doc(db,"config","lists"),{[list]:clone},{merge:true});
 }
+
+function renderManageTeam(){
+  const items=teamItems();
+  let rows="";
+  items.forEach(it=>{
+    rows+=`<div class="mgrow"><span>${it.label}</span>
+      <label style="font-size:12px;color:var(--muted)">need
+      <input class="tgtIn" data-id="${it.id}" type="number" min="0" value="${it.target}" style="width:54px;margin:0 6px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;font-family:inherit"></label>
+      <button class="rm" data-rmt="${it.id}" title="Remove team item">×</button></div>`;
+  });
+  $("manageBody").innerHTML=`<div class="card"><div class="dash-h">Team Needs</div>
+    <div class="note" style="margin-top:0">Set how many of each the team needs, add or remove items. Families contribute on the Player page.</div>
+    ${rows}
+    <div class="addmini"><input id="tnAddLabel" placeholder="New team item…" maxlength="40"><input id="tnAddQty" type="number" min="1" value="1" style="width:54px;border:1px dashed #c3cad2;border-radius:7px;padding:6px"><button id="tnAddBtn">+</button></div>
+    </div>`;
+  $("manageBody").querySelectorAll(".tgtIn").forEach(i=>i.addEventListener("change",()=>{
+    setTeam(items.map(x=>x.id===i.dataset.id?{label:x.label,target:Math.max(0,parseInt(i.value)||0)}:{label:x.label,target:x.target}));}));
+  $("manageBody").querySelectorAll("[data-rmt]").forEach(b=>b.onclick=()=>{
+    if(!confirm("Remove this team item for everyone?"))return;
+    setTeam(items.filter(x=>x.id!==b.dataset.rmt).map(x=>({label:x.label,target:x.target})));});
+  const add=()=>{const l=$("tnAddLabel").value.trim();if(!l)return;
+    if(items.some(x=>x.id===slug(l)))return;
+    const q=Math.max(0,parseInt($("tnAddQty").value)||1);
+    setTeam([...items.map(x=>({label:x.label,target:x.target})),{label:l,target:q}]);};
+  $("tnAddBtn").onclick=add;
+  $("tnAddLabel").addEventListener("keydown",e=>{if(e.key==="Enter")add();});
+}
+function setTeam(arr){setDoc(doc(db,"config","team"),{items:arr},{merge:true});}
 </script>
 </body>
 </html>
