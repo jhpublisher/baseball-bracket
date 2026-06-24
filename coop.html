@@ -86,8 +86,17 @@
   .tn-count{font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap}
   .tn-count.filled{color:var(--good)}
   .tn-step{display:flex;gap:5px;flex:0 0 auto}
+  .tn-sub{font-size:11px;color:var(--good);font-weight:700;margin-top:1px}
   .tn-bar{height:4px;background:#eee6d6;border-radius:99px;overflow:hidden;margin:5px 0 0}
   .tn-bar>i{display:block;height:100%;background:var(--red)}
+  .subtabs{display:flex;gap:6px;margin-top:4px}
+  .subtab{flex:1;padding:9px 6px;border:1px solid var(--line);background:#fff;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;color:var(--muted)}
+  .subtab.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .cb{padding:9px 2px;border-bottom:1px solid var(--line)}
+  .cb-top{display:flex;align-items:center;gap:8px}
+  .cb-name{font-weight:600;font-size:14px}
+  .cb-tot{margin-left:auto;font-size:12px;color:var(--muted);font-weight:700}
+  .cb-who{font-size:13px;color:var(--muted);margin-top:3px}
   .stp{width:26px;height:26px;border:none;border-radius:6px;background:var(--red);color:#fff;font-size:16px;line-height:1;cursor:pointer;font-weight:700}
   .stp:hover{background:var(--red-d)}
   .stp:disabled{background:#d8cdbf;cursor:not-allowed}
@@ -249,21 +258,42 @@
         <div class="bar" style="margin-bottom:10px"><i id="tbar"></i></div>
         <div id="teamOverview"><div class="empty">Loading…</div></div>
       </div>
-      <div class="card"><div class="dash-h">Player packing progress</div><div id="dashPlayers"><div class="empty">Loading…</div></div></div>
-      <div class="card"><div class="dash-h">Coach packing progress</div><div id="dashCoaches"><div class="empty">Loading…</div></div></div>
     </section>
 
     <section class="panel hide" id="panel-manage">
       <div class="card">
-        <div class="dash-h">Manage standard list</div>
-        <div class="note" style="margin-top:0">Coaches only. Add or remove items from the master list <b>everyone</b> sees. Families' personal check-offs and their own added items aren't affected.</div>
-        <div class="switch" style="margin-top:12px">
-          <button id="mgPlayer" class="on">Player list</button>
-          <button id="mgCoach">Coach list</button>
-          <button id="mgTeam">Team needs</button>
+        <div class="dash-h">Manage (coaches)</div>
+        <div class="subtabs">
+          <button class="subtab on" data-sub="lists">Lists</button>
+          <button class="subtab" data-sub="progress">Team Progress</button>
+          <button class="subtab" data-sub="contrib">Contributions</button>
         </div>
       </div>
-      <div id="manageBody"></div>
+
+      <div id="mg-lists">
+        <div class="card">
+          <div class="note" style="margin-top:0">Add or remove items from the master list <b>everyone</b> sees, and set team-need quantities. Families' personal check-offs and added items aren't affected.</div>
+          <div class="switch" style="margin-top:10px">
+            <button id="mgPlayer" class="on">Player list</button>
+            <button id="mgCoach">Coach list</button>
+            <button id="mgTeam">Team needs</button>
+          </div>
+        </div>
+        <div id="manageBody"></div>
+      </div>
+
+      <div id="mg-progress" class="hide">
+        <div class="card"><div class="dash-h">Player packing progress</div><div id="dashPlayers"><div class="empty">Loading…</div></div></div>
+        <div class="card"><div class="dash-h">Coach packing progress</div><div id="dashCoaches"><div class="empty">Loading…</div></div></div>
+      </div>
+
+      <div id="mg-contrib" class="hide">
+        <div class="card">
+          <div class="dash-h">Team needs — who's bringing what</div>
+          <div class="note" style="margin-top:0">Coaches only — families never see this.</div>
+          <div id="contribBody"><div class="empty">Loading…</div></div>
+        </div>
+      </div>
     </section>
   </div>
 </div>
@@ -456,7 +486,7 @@ function startApp(){
       renderList("coach",recCoach,"coachBody","cpct","cbar",ref);
     }));
   }
-  unsub.push(onSnapshot(collection(db,"community"),s=>{teamMap={};s.forEach(d=>teamMap[d.id]=d.data());renderTeamNeeds();renderTeamOverview();}));
+  unsub.push(onSnapshot(collection(db,"community"),s=>{teamMap={};s.forEach(d=>teamMap[d.id]=d.data());renderTeamNeeds();renderTeamOverview();renderContrib();}));
   unsub.push(onSnapshot(collection(db,"players"),s=>{const r=[];s.forEach(d=>r.push({id:d.id,...d.data()}));renderPlayerDash(r)}));
   unsub.push(onSnapshot(collection(db,"coaches"),s=>{const r=[];s.forEach(d=>r.push({id:d.id,...d.data()}));renderCoachDash(r)}));
   unsub.push(onSnapshot(doc(db,"config","lists"),snap=>{MASTER=snap.exists()?snap.data():null;rerenderAll();}));
@@ -472,6 +502,13 @@ function activate(tab){
   $("floatPrint").style.display = (tab==="player"||tab==="coach") ? "flex" : "none";
 }
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>activate(t.dataset.tab));
+
+document.querySelectorAll(".subtab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".subtab").forEach(x=>x.classList.remove("on"));t.classList.add("on");
+  const s=t.dataset.sub;
+  ["lists","progress","contrib"].forEach(k=>$("mg-"+k).classList.toggle("hide",k!==s));
+  if(s==="contrib")renderContrib();
+});
 
 $("floatPrint").onclick=openPrintView;
 
@@ -579,19 +616,22 @@ function renderList(list,rec,bodyId,pctId,barId,ref){
   if(cm)cm.addEventListener("blur",()=>setDoc(ref,{padlockCombo:cm.value.trim()},{merge:true}));
 }
 
+function teamHave(id){const c=teamMap[id]&&teamMap[id].contrib;return c?Object.values(c).reduce((a,b)=>a+(b||0),0):0;}
 function renderTeamNeeds(){
   const card=$("teamNeedsCard"); if(!card) return;
   const items=teamItems();
   let rows="";
   items.forEach(it=>{
-    const have=(teamMap[it.id]&&teamMap[it.id].count)||0;
+    const have=teamHave(it.id);
+    const mine=(teamMap[it.id]&&teamMap[it.id].contrib&&teamMap[it.id].contrib[playerId])||0;
     const filled=it.target>0&&have>=it.target;
     const pct=it.target>0?Math.min(100,Math.round(have/it.target*100)):(have>0?100:0);
     rows+=`<div class="tn">
       <div class="tn-row"><span class="tn-name">${it.label}</span>
         <span class="tn-count ${filled?'filled':''}">${have} of ${it.target}${filled?' ✓':''}</span>
-        <button class="stp" data-dec="${it.id}" ${have<=0?'disabled':''}>−</button>
+        <button class="stp" data-dec="${it.id}" ${mine<=0?'disabled':''}>−</button>
         <button class="stp" data-inc="${it.id}">+</button></div>
+      ${mine>0?`<div class="tn-sub">you: ${mine}</div>`:''}
       <div class="tn-bar"><i style="width:${pct}%"></i></div></div>`;
   });
   card.innerHTML=`<div class="sec-h tn-head">Team Needs</div>
@@ -600,16 +640,16 @@ function renderTeamNeeds(){
   card.querySelectorAll("[data-dec]").forEach(b=>b.onclick=()=>bump(b.dataset.dec,-1));
 }
 async function bump(id,delta){
-  const cur=(teamMap[id]&&teamMap[id].count)||0;
-  if(delta<0&&cur<=0)return;
-  await setDoc(doc(db,"community",id),{count:increment(delta)},{merge:true});
+  const mine=(teamMap[id]&&teamMap[id].contrib&&teamMap[id].contrib[playerId])||0;
+  if(delta<0&&mine<=0)return;
+  await setDoc(doc(db,"community",id),{contrib:{[playerId]:increment(delta)}},{merge:true});
 }
 function renderTeamOverview(){
   const ov=$("teamOverview"); if(!ov) return;
   const items=teamItems();
   let have=0,need=0,html="";
   items.forEach(it=>{
-    const h=(teamMap[it.id]&&teamMap[it.id].count)||0;
+    const h=teamHave(it.id);
     have+=Math.min(h,it.target); need+=it.target;
     const filled=it.target>0&&h>=it.target;
     const pct=it.target>0?Math.min(100,Math.round(h/it.target*100)):0;
@@ -618,6 +658,21 @@ function renderTeamOverview(){
   ov.innerHTML=`<table><tbody>${html}</tbody></table>`;
   const opct=need>0?Math.round(have/need*100):0;
   $("tpct").textContent=opct+"%"; $("tbar").style.width=opct+"%";
+}
+function renderContrib(){
+  const ov=$("contribBody"); if(!ov) return;
+  const items=teamItems();
+  let html="";
+  items.forEach(it=>{
+    const c=(teamMap[it.id]&&teamMap[it.id].contrib)||{};
+    const entries=Object.entries(c).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+    const total=entries.reduce((a,[,v])=>a+v,0);
+    const who=entries.map(([pid,v])=>`${ROSTER.find(n=>slug(n)===pid)||pid}: ${v}`).join("  ·  ")||"— nobody yet";
+    html+=`<div class="cb"><div class="cb-top"><span class="cb-name">${it.label}</span>
+      <span class="cb-tot">${total} of ${it.target}</span></div>
+      <div class="cb-who">${who}</div></div>`;
+  });
+  ov.innerHTML=html||'<div class="empty">No team items.</div>';
 }
 
 function renderPlayerDash(rows){
